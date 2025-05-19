@@ -58,7 +58,72 @@ data <- select(data, !tract_one_to_four_family_homes) # Not needed for analysis
 data <- select(data, !tract_median_age_of_housing_units) # Not needed for analysis
 dim(data) # 7557 observations and 25 variables
 
+
 # Handling missing values
 sum(is.na(data$census_tract)) # 19 NAs -> no sensible replacement value -> removing
 data <- drop_na(data, census_tract)
+data <- select(data, !census_tract) # Not needed anymore
+sum(is.na(data$property_value)) # 322 NAs -> property_value is crucial for mortgage credit applications -> removing
+data <- drop_na(data, property_value)
+sum(is.na(data$income)) # 325 NAs -> no sensible replacement value -> removing
+data <- drop_na(data, income)
+sum(is.na(data$debt_to_income_ratio)) # 90 NAs -> new category "unkonwn"
+data$debt_to_income_ratio <- replace_na(data$debt_to_income_ratio, "unknown")
+sum(is.na(data$loan_term)) # 95 NAs -> replace with median
+data$loan_term <- as.numeric(data$loan_term)
+data$loan_term <- replace_na(data$loan_term, median(data$loan_term, na.rm = TRUE))
+sum(is.na(data$loan_to_value_ratio)) # 91 NAs -> we can calculate it by ourselves by loan_amount/property_value -> remove column
+data <- select(data, !loan_to_value_ratio)
+data$loan_amount <- as.numeric(data$loan_amount)
+data$property_value <- as.numeric(data$property_value)
+data <- mutate(data, loan_to_property_value_ratio = round(loan_amount/property_value * 100, 2))
+dim(data) # 6891 observations and 24 variables
+
+
+# Categorical variables to factors and numerical features to numerics
+data <- data %>% 
+  mutate(action_taken = if_else(action_taken == 1, "Loan approved", "Loan denied"),
+         preapproval = if_else(preapproval == 1, "Preapproval requested", "Preapproval not requested"),
+         loan_type = if_else(loan_type == 1, "Conventional",
+                             if_else(loan_type == 2, "FHA", "VA")),
+         loan_purpose = if_else(loan_purpose == 1, "Home purchase",
+                                if_else(loan_purpose == 2, "Home improvement",
+                                        if_else(loan_purpose == 31, "Refinancing",
+                                                if_else(loan_purpose == 32, "Cash-out refinancing", "Other purpose")))),
+         lien_status = if_else(lien_status == 1, "Secured by a first lien", "Secured by a subordinate lien"),
+         open.end_line_of_credit = if_else(open.end_line_of_credit == 1, "Open-end line of credit", "Not an open-end line of credit"),
+         business_or_commercial_purpose = if_else(business_or_commercial_purpose == 1,
+                                                  "Primarily for a business or commercial purpose",
+                                                  "Not primarily for a business or commercial purpose"),
+         hoepa_status = if_else(hoepa_status == 1, "High-cost mortgage",
+                                if_else(hoepa_status == 2, "Not a high-cost mortgage", "Not applicable")),
+         occupancy_type = if_else(occupancy_type == 1, "Principal residence",
+                                  if_else(occupancy_type == 2, "Second residence", "Investment property"))
+         )
+
+data <- data %>% 
+  mutate(
+    lei = as.factor(lei),
+    derived_ethnicity = as.factor(derived_ethnicity),
+    derived_race = as.factor(derived_race),
+    derived_sex = as.factor(derived_sex),
+    action_taken = as.factor(action_taken),
+    preapproval = as.factor(preapproval),
+    loan_type = as.factor(loan_type),
+    loan_purpose = as.factor(loan_purpose),
+    lien_status = as.factor(lien_status),
+    open.end_line_of_credit = as.factor(open.end_line_of_credit),
+    business_or_commercial_purpose = as.factor(business_or_commercial_purpose),
+    hoepa_status = as.factor(hoepa_status),
+    occupancy_type = as.factor(occupancy_type),
+    total_units = as.factor(total_units),
+    debt_to_income_ratio = as.factor(debt_to_income_ratio),
+    applicant_credit_score_type = as.factor(applicant_credit_score_type),
+    applicant_age = as.factor(applicant_age),
+    income = as.numeric(income)
+  )
+
+
+# Save preprocessed data
+write.csv(data, file = "./data/credit_approval_data.csv")
 
