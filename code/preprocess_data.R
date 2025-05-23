@@ -22,6 +22,7 @@ data <- select(data, -c(49:73)) # Not needed for analysis
 dim(data) # 7557 observations and 59 variables
 
 # Now more precise removal of unnecessary columns
+data <- select(data, !lei) # Not needed for analysis
 data <- select(data, !activity_year) # We only look at year 2023 -> unnecessary
 data <- select(data, !state_code) # We only look at District of Columbia (DC) -> unnecessary
 data <- select(data, !county_code) # DC only has county 11001 -> unnecessary
@@ -56,7 +57,9 @@ data <- select(data, !ffiec_msa_md_median_family_income) # Almost only takes val
 data <- select(data, !tract_owner_occupied_units) # Not needed for analysis
 data <- select(data, !tract_one_to_four_family_homes) # Not needed for analysis
 data <- select(data, !tract_median_age_of_housing_units) # Not needed for analysis
-dim(data) # 7557 observations and 25 variables
+data <- select(data, !hoepa_status) # Not needed for analysis
+data <- select(data, !loan_to_value_ratio) # Not needed for analysis
+dim(data) # 7557 observations and 22 variables
 
 
 # Handling missing values
@@ -72,12 +75,7 @@ data$debt_to_income_ratio <- replace_na(data$debt_to_income_ratio, "unknown")
 sum(is.na(data$loan_term)) # 95 NAs -> replace with median
 data$loan_term <- as.numeric(data$loan_term)
 data$loan_term <- replace_na(data$loan_term, median(data$loan_term, na.rm = TRUE))
-sum(is.na(data$loan_to_value_ratio)) # 91 NAs -> we can calculate it by ourselves by loan_amount/property_value -> remove column
-data <- select(data, !loan_to_value_ratio)
-data$loan_amount <- as.numeric(data$loan_amount)
-data$property_value <- as.numeric(data$property_value)
-data <- mutate(data, loan_to_property_value_ratio = round(loan_amount/property_value * 100, 2))
-dim(data) # 6891 observations and 24 variables
+dim(data) # 6891 observations and 21 variables
 
 
 # Categorical variables to factors and numerical features to numerics
@@ -95,15 +93,12 @@ data <- data %>%
          business_or_commercial_purpose = if_else(business_or_commercial_purpose == 1,
                                                   "Primarily for a business or commercial purpose",
                                                   "Not primarily for a business or commercial purpose"),
-         hoepa_status = if_else(hoepa_status == 1, "High-cost mortgage",
-                                if_else(hoepa_status == 2, "Not a high-cost mortgage", "Not applicable")),
          occupancy_type = if_else(occupancy_type == 1, "Principal residence",
                                   if_else(occupancy_type == 2, "Second residence", "Investment property"))
          )
 
 data <- data %>% 
   mutate(
-    lei = as.factor(lei),
     derived_ethnicity = as.factor(derived_ethnicity),
     derived_race = as.factor(derived_race),
     derived_sex = as.factor(derived_sex),
@@ -114,16 +109,18 @@ data <- data %>%
     lien_status = as.factor(lien_status),
     open.end_line_of_credit = as.factor(open.end_line_of_credit),
     business_or_commercial_purpose = as.factor(business_or_commercial_purpose),
-    hoepa_status = as.factor(hoepa_status),
     occupancy_type = as.factor(occupancy_type),
     total_units = as.factor(total_units),
     debt_to_income_ratio = as.factor(debt_to_income_ratio),
     applicant_credit_score_type = as.factor(applicant_credit_score_type),
     applicant_age = as.factor(applicant_age),
-    income = as.numeric(income)
+    income = as.numeric(income),
+    loan_amount = as.numeric(loan_amount),
+    property_value = as.numeric(property_value)
   )
 
 
 # Save preprocessed data
 write.csv(data, file = "./data/credit_approval_data.csv")
+saveRDS(data, file = "./data/credit_approval_data.rds")
 
