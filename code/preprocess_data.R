@@ -41,7 +41,7 @@ data <- select(data, !discount_points) # Many NAs (~47%) -> Not really usable fo
 data <- select(data, !lender_credits) # Many NAs (~47%) -> Not really usable for analysis
 data <- select(data, !prepayment_penalty_term) # Many NAs (~95%) -> Not really usable for analysis
 data <- select(data, !intro_rate_period) # Many NAs (~71%) -> Not really usable for analysis
-data <- select(data, !negative_amortization) # Only takes the vlaue 2 -> unnecessary
+data <- select(data, !negative_amortization) # Only takes the value 2 -> unnecessary
 data <- select(data, !interest_only_payment) # Not needed for analysis
 data <- select(data, !balloon_payment) # Almost only takes value 2 -> unnecessary
 data <- select(data, !other_nonamortizing_features) # Almost only takes value 2 -> unnecessary
@@ -79,6 +79,8 @@ dim(data) # 6891 observations and 21 variables
 
 
 # Categorical variables to factors and numerical features to numerics
+
+
 data <- data %>% 
   mutate(action_taken = if_else(action_taken == 1, "Loan approved", "Loan denied"),
          preapproval = if_else(preapproval == 1, "Preapproval requested", "Preapproval not requested"),
@@ -94,7 +96,14 @@ data <- data %>%
                                                   "Primarily for a business or commercial purpose",
                                                   "Not primarily for a business or commercial purpose"),
          occupancy_type = if_else(occupancy_type == 1, "Principal residence",
-                                  if_else(occupancy_type == 2, "Second residence", "Investment property"))
+                                  if_else(occupancy_type == 2, "Second residence", "Investment property")),
+         debt_to_income_ratio = if_else(debt_to_income_ratio %in% c("36", "37", "38", "39", "40", "41", "42"), "36%-42%",
+                                        if_else(debt_to_income_ratio %in% c("43", "44", "45", "46", "47", "48", "49"), "43%-49%",
+                                        debt_to_income_ratio)),
+         debt_to_income_ratio = if_else(debt_to_income_ratio == "20%-<30%", "20%-29%",
+                                        if_else(debt_to_income_ratio == "30%-<36%", "30%-35%", debt_to_income_ratio)),
+         derived_race = if_else(derived_race %in% c("2 or more minority races","Free Form Text Only", "American Indian or Alaska Native",
+                                                    "Native Hawaiian or Other Pacific Islander"), "Other", derived_race)
          )
 
 data <- data %>% 
@@ -111,7 +120,8 @@ data <- data %>%
     business_or_commercial_purpose = as.factor(business_or_commercial_purpose),
     occupancy_type = as.factor(occupancy_type),
     total_units = as.factor(total_units),
-    debt_to_income_ratio = as.factor(debt_to_income_ratio),
+    debt_to_income_ratio = factor(debt_to_income_ratio,
+                                  levels = c("<20%", "20%-29%", "30%-35%", "36%-42%", "43%-49%", "50%-60%", ">60%", "unknown")),
     applicant_credit_score_type = as.factor(applicant_credit_score_type),
     applicant_age = as.factor(applicant_age),
     income = as.numeric(income),
