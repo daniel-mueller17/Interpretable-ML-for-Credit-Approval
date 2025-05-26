@@ -10,77 +10,101 @@ data_raw <- read.csv("./data/data_raw/actions_taken_1-3_state_DC.csv") # 11531 o
 # https://ffiec.cfpb.gov/documentation/publications/loan-level-datasets/lar-data-fields
 
 
-# We only look at data with only one applicant
-# So we remove all data with one or more co-applicants
-data <- filter(data_raw, co.applicant_credit_score_type == 10) # 10 means "No co-applicant"
+# Select interesting variables for analysis.
+# All other variables are either not needed or cannot be used properly (e.g. due to number of NAs)
+data <- data_raw %>% 
+  select(
+    action_taken,
+    applicant_credit_score_type,
+    co.applicant_credit_score_type,
+    income,
+    debt_to_income_ratio,
+    applicant_age,
+    applicant_ethnicity.1,
+    applicant_race.1,
+    applicant_sex,
+    loan_amount,
+    loan_to_value_ratio,
+    interest_rate,
+    rate_spread,
+    loan_type,
+    loan_purpose,
+    loan_term,
+    origination_charges,
+    total_loan_costs,
+    discount_points,
+    property_value,
+    total_units,
+    occupancy_type,
+    derived_dwelling_category,
+    conforming_loan_limit,
+    tract_population,
+    tract_minority_population_percent,
+    ffiec_msa_md_median_family_income,
+    tract_to_msa_income_percentage,
+    tract_owner_occupied_units,
+    tract_median_age_of_housing_units,
+    submission_of_application,
+    business_or_commercial_purpose
+  )
 
-# Rough removal of unnecessary columns
-data <- select(data, -c(84:92)) # Not needed for analysis
-data <- select(data, -c(79:81)) # Not needed for analysis
-data <- select(data, -c(75:77)) # Not needed for analysis
-data <- select(data, -c(49:73)) # Not needed for analysis
-dim(data) # 7557 observations and 59 variables
-
-# Now more precise removal of unnecessary columns
-data <- select(data, !lei) # Not needed for analysis
-data <- select(data, !activity_year) # We only look at year 2023 -> unnecessary
-data <- select(data, !state_code) # We only look at District of Columbia (DC) -> unnecessary
-data <- select(data, !county_code) # DC only has county 11001 -> unnecessary
-data <- select(data, !derived_msa.md) # Almost only takes the value 47894 -> unnecessary
-data <- select(data, !conforming_loan_limit) # Not needed for analysis
-data <- select(data, !derived_loan_product_type) # Same information in loan_type and lien_status
-data <- select(data, !derived_dwelling_category) # Not needed for analysis
-data <- select(data, !purchaser_type) # Not needed for analysis
-data <- select(data, !reverse_mortgage) # Almost only takes value 2 -> unnecessary
-data <- select(data, !interest_rate) # Only accepted credits have an interest_rate -> Not really usable for analysis
-data <- select(data, !rate_spread) # Same as with interest_rate
-data <- select(data, !total_loan_costs) # Many NAs (~47%) -> Not really usable for analysis
-data <- select(data, !total_points_and_fees) # Many NAs (~100%) -> Not usable for analysis
-data <- select(data, !origination_charges) # Many NAs (~46%) -> Not really usable for analysis
-data <- select(data, !discount_points) # Many NAs (~47%) -> Not really usable for analysis
-data <- select(data, !lender_credits) # Many NAs (~47%) -> Not really usable for analysis
-data <- select(data, !prepayment_penalty_term) # Many NAs (~95%) -> Not really usable for analysis
-data <- select(data, !intro_rate_period) # Many NAs (~71%) -> Not really usable for analysis
-data <- select(data, !negative_amortization) # Only takes the value 2 -> unnecessary
-data <- select(data, !interest_only_payment) # Not needed for analysis
-data <- select(data, !balloon_payment) # Almost only takes value 2 -> unnecessary
-data <- select(data, !other_nonamortizing_features) # Almost only takes value 2 -> unnecessary
-data <- select(data, !construction_method) # Almost only takes value 1 -> unnecessary
-data <- select(data, !manufactured_home_secured_property_type) # Almost only takes value 3 -> unnecessary
-data <- select(data, !manufactured_home_land_property_interest) # Almost only takes value 5 -> unnecessary
-data <- select(data, !multifamily_affordable_units) # Many NAs (~99%) -> Not really usable for analysis
-data <- select(data, !applicant_sex) # Same information as in derived_sex -> unnecessary
-data <- select(data, !submission_of_application) # Not needed for analysis
-data <- select(data, !initially_payable_to_institution) # Almost only takes value 1 -> unnecessary
-data <- select(data, !tract_population) # Not needed for analysis
-data <- select(data, !ffiec_msa_md_median_family_income) # Almost only takes value 150100 -> unnecessary
-data <- select(data, !tract_owner_occupied_units) # Not needed for analysis
-data <- select(data, !tract_one_to_four_family_homes) # Not needed for analysis
-data <- select(data, !tract_median_age_of_housing_units) # Not needed for analysis
-data <- select(data, !hoepa_status) # Not needed for analysis
-data <- select(data, !loan_to_value_ratio) # Not needed for analysis
-dim(data) # 7557 observations and 22 variables
+# We create a new variable "has_co.applicant"
+data <- data %>% 
+  mutate(
+    has_co.applicant = if_else(co.applicant_credit_score_type == 10, "No", # 10 means "No co-applicant"
+                               "Yes"),
+    co.applicant_credit_score_type = NULL # Not needed anymore
+  )
+dim(data) # 11531 observations and 33 variables
 
 
-# Handling missing values
-sum(is.na(data$census_tract)) # 19 NAs -> no sensible replacement value -> removing
-data <- drop_na(data, census_tract)
-data <- select(data, !census_tract) # Not needed anymore
-sum(is.na(data$property_value)) # 322 NAs -> property_value is crucial for mortgage credit applications -> removing
-data <- drop_na(data, property_value)
-sum(is.na(data$income)) # 325 NAs -> no sensible replacement value -> removing
-data <- drop_na(data, income)
-sum(is.na(data$debt_to_income_ratio)) # 90 NAs -> new category "unkonwn"
+# Handling missing values and other special values
+sum(is.na(data$income)) # 792 NAs -> impute values with median grouped by "tract_to_msa_income_percentage"
+data <- data %>% 
+  group_by(tract_to_msa_income_percentage) %>% 
+  mutate(income = if_else(is.na(income), median(income, na.rm = TRUE), income)) %>%
+  ungroup()
+
+sum(is.na(data$debt_to_income_ratio)) # 855 NAs -> new category "unknown"
 data$debt_to_income_ratio <- replace_na(data$debt_to_income_ratio, "unknown")
-sum(is.na(data$loan_term)) # 95 NAs -> replace with median
+sum(data$debt_to_income_ratio == "Exempt") # 144 obs. -> also unknown
+data <- data %>%  mutate(
+  debt_to_income_ratio = if_else(debt_to_income_ratio == "Exempt", "unknown", debt_to_income_ratio))
+
+sum(data$loan_term == "Exempt", na.rm = TRUE) # 144 obs. -> remove
+data <- data %>% 
+  filter(loan_term != "Exempt")
+sum(is.na(data$loan_term)) # 136 NAs -> replace with median
 data$loan_term <- as.numeric(data$loan_term)
 data$loan_term <- replace_na(data$loan_term, median(data$loan_term, na.rm = TRUE))
+
+sum(is.na(data$property_value)) # 419 NAs -> impute values with median groubed by "total_units"
+data$property_value <- as.numeric(data$property_value)
+data <- data %>% 
+  group_by(total_units) %>% 
+  mutate(property_value = if_else(is.na(property_value), median(property_value, na.rm = TRUE), property_value)) %>%
+  ungroup()
+
+sum(is.na(data$applicant_ethnicity.1)) # 5 NAs -> remove
+data <- drop_na(data, applicant_ethnicity.1)
+
+sum(is.na(data$applicant_race.1)) # 2 NAs -> remove
+data <- drop_na(data, applicant_race.1)
+
+sum(is.na(data$loan_to_value_ratio)) # 512 NAs -> calculate values with loan_amount/property_value
+data$loan_to_value_ratio <- as.numeric(data$loan_to_value_ratio)
+data <- data %>% 
+  mutate(loan_to_value_ratio = if_else(is.na(loan_to_value_ratio), (loan_amount/property_value)*100, loan_to_value_ratio))
+
+
+
+
+
+
 dim(data) # 6891 observations and 21 variables
 
 
 # Categorical variables to factors and numerical features to numerics
-
-
 data <- data %>% 
   mutate(action_taken = if_else(action_taken == 1, "Loan approved", "Loan denied"),
          preapproval = if_else(preapproval == 1, "Preapproval requested", "Preapproval not requested"),
