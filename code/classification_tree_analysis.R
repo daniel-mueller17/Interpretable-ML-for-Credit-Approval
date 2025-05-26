@@ -25,7 +25,7 @@ task$set_col_roles("action_taken", add_to = "stratum") # Target variable is kind
 
 learner <- lrn("classif.rpart", predict_type = "prob")
 
-resampling = rsmp("holdout", ratio = 0.8)
+resampling = rsmp("holdout", ratio = 0.75)
 
 resampling$instantiate(task)
 
@@ -47,7 +47,7 @@ evaluation
 
 # Feature Importance
 loss_fi <- msr("classif.logloss")
-resampling_fi = rsmp("subsampling", ratio = 0.8, repeats = 50)
+resampling_fi = rsmp("subsampling", ratio = 0.75, repeats = 50)
 
 # LOCO
 res_loco <- loco(task, learner, resampling_fi, loss_fi)
