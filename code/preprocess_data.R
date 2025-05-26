@@ -2,6 +2,7 @@
 # Load packages
 library(dplyr)
 library(tidyr)
+library(ggplot2)
 
 # Read data
 data_raw <- read.csv("./data/data_raw/actions_taken_1-3_state_DC.csv") # 11531 observations and 99 variables
@@ -36,16 +37,17 @@ data <- data_raw %>%
     property_value,
     total_units,
     occupancy_type,
-    derived_dwelling_category,
     conforming_loan_limit,
     tract_population,
     tract_minority_population_percent,
-    ffiec_msa_md_median_family_income,
     tract_to_msa_income_percentage,
     tract_owner_occupied_units,
     tract_median_age_of_housing_units,
     submission_of_application,
-    business_or_commercial_purpose
+    business_or_commercial_purpose,
+    preapproval,
+    lien_status,
+    open.end_line_of_credit
   )
 
 # We create a new variable "has_co.applicant"
@@ -74,7 +76,7 @@ data <- data %>%  mutate(
 sum(data$loan_term == "Exempt", na.rm = TRUE) # 144 obs. -> remove
 data <- data %>% 
   filter(loan_term != "Exempt")
-sum(is.na(data$loan_term)) # 136 NAs -> replace with median
+sum(is.na(data$loan_term))
 data$loan_term <- as.numeric(data$loan_term)
 data$loan_term <- replace_na(data$loan_term, median(data$loan_term, na.rm = TRUE))
 
@@ -96,12 +98,25 @@ data$loan_to_value_ratio <- as.numeric(data$loan_to_value_ratio)
 data <- data %>% 
   mutate(loan_to_value_ratio = if_else(is.na(loan_to_value_ratio), (loan_amount/property_value)*100, loan_to_value_ratio))
 
+sum(is.na(data$interest_rate)) # 2807 NAs -> variable not really usable -> remove column
+data$interest_rate <- NULL
 
+sum(is.na(data$rate_spread)) # 3576 NAs -> same with interest_rate
+data$rate_spread <- NULL
 
+sum(is.na(data$origination_charges)) # 4666 NAs -> same with interest_rate
+data$origination_charges <- NULL
 
+sum(is.na(data$total_loan_costs)) # 4699 NAs -> same with interest_rate
+data$total_loan_costs <- NULL
 
+sum(is.na(data$discount_points)) # 4683 NAs -> same with interest_rate
+data$discount_points <- NULL
 
-dim(data) # 6891 observations and 21 variables
+sum(is.na(data$conforming_loan_limit)) # 138 NAs -> new category "unknown"
+data$conforming_loan_limit <- replace_na(data$conforming_loan_limit, "unknown")
+
+dim(data) # 11244 observations and 29 variables
 
 
 # Categorical variables to factors and numerical features to numerics
@@ -115,7 +130,7 @@ data <- data %>%
                                         if_else(loan_purpose == 31, "Refinancing",
                                                 if_else(loan_purpose == 32, "Cash-out refinancing", "Other purpose")))),
          lien_status = if_else(lien_status == 1, "Secured by a first lien", "Secured by a subordinate lien"),
-         open.end_line_of_credit = if_else(open.end_line_of_credit == 1, "Open-end line of credit", "Not an open-end line of credit"),
+         open.end_line_of_credit = if_else(open.end_line_of_credit == 1, "Open-end line of credit", "Not open-end line of credit"),
          business_or_commercial_purpose = if_else(business_or_commercial_purpose == 1,
                                                   "Primarily for a business or commercial purpose",
                                                   "Not primarily for a business or commercial purpose"),
@@ -126,15 +141,25 @@ data <- data %>%
                                         debt_to_income_ratio)),
          debt_to_income_ratio = if_else(debt_to_income_ratio == "20%-<30%", "20%-29%",
                                         if_else(debt_to_income_ratio == "30%-<36%", "30%-35%", debt_to_income_ratio)),
-         derived_race = if_else(derived_race %in% c("2 or more minority races","Free Form Text Only", "American Indian or Alaska Native",
-                                                    "Native Hawaiian or Other Pacific Islander"), "Other", derived_race)
-         )
+         applicant_ethnicity.1 = if_else(applicant_ethnicity.1 %in% c(1, 11, 12, 13, 14), "Hispanic or Latino",
+                                         if_else(applicant_ethnicity.1 == 2, "Not Hispanic or Latino", "unknwon")),
+         applicant_race.1 = if_else(applicant_race.1 %in% c(2, 21, 22, 23, 24, 25, 26, 27), "Asian",
+                                    if_else(applicant_race.1 == 3, "Black or African American",
+                                            if_else(applicant_race.1 == 5, "White", "other"))),
+         applicant_sex = if_else(applicant_sex %in% c(3, 4, 6), "unknown",
+                                 if_else(applicant_sex == 1, "Male", "Female")),
+         submission_of_application = if_else(submission_of_application == 1, "Submitted directly", "Not submitted directly")
+  ) %>% 
+  rename(
+    applicant_ethnicity = applicant_ethnicity.1,
+    applicant_race = applicant_race.1,
+  )
 
 data <- data %>% 
   mutate(
-    derived_ethnicity = as.factor(derived_ethnicity),
-    derived_race = as.factor(derived_race),
-    derived_sex = as.factor(derived_sex),
+    applicant_ethnicity = as.factor(applicant_ethnicity),
+    applicant_race = as.factor(applicant_race),
+    applicant_sex = as.factor(applicant_sex),
     action_taken = as.factor(action_taken),
     preapproval = as.factor(preapproval),
     loan_type = as.factor(loan_type),
@@ -150,8 +175,40 @@ data <- data %>%
     applicant_age = as.factor(applicant_age),
     income = as.numeric(income),
     loan_amount = as.numeric(loan_amount),
-    property_value = as.numeric(property_value)
+    property_value = as.numeric(property_value),
+    has_co.applicant = as.factor(has_co.applicant),
+    conforming_loan_limit = as.factor(conforming_loan_limit),
+    submission_of_application = as.factor(submission_of_application)
   )
+
+
+# Transformation of various variables
+data %>% 
+  ggplot(aes(x = income)) +
+  geom_density() # heavy skewed -> log transformation
+table(data$income < 0) # only 15 values < 0 -> set them to 0 for log transformation
+
+data %>% 
+  ggplot(aes(x = property_value)) +
+  geom_density() # heavy skewed -> log transformation
+table(data$property_value <= 0) # No value <= 0
+
+data %>% 
+  ggplot(aes(x = loan_amount)) +
+  geom_density() # heavy skewed -> log transformation
+table(data$loan_amount <= 0) # No value <= 0
+
+data <- data %>% 
+  mutate(income_log = if_else(income < 0, 0, income),
+         income_log = log1p(income_log),
+         property_value_log = log(property_value),
+         loan_amount_log = log(loan_amount)
+  )
+
+# We dont need to original variables any longer
+data$income <- NULL
+data$property_value <- NULL
+data$loan_amount <- NULL
 
 
 # Save preprocessed data
