@@ -148,7 +148,9 @@ data <- data %>%
                                             if_else(applicant_race.1 == 5, "White", "other"))),
          applicant_sex = if_else(applicant_sex %in% c(3, 4, 6), "unknown",
                                  if_else(applicant_sex == 1, "Male", "Female")),
-         submission_of_application = if_else(submission_of_application == 1, "Submitted directly", "Not submitted directly")
+         submission_of_application = if_else(submission_of_application == 1, "Submitted directly", "Not submitted directly"),
+         applicant_credit_score_type = if_else(applicant_credit_score_type %in% c(4, 5, 6), 8,
+                                               if_else(applicant_credit_score_type %in% c(9, 11), 9, applicant_credit_score_type))
   ) %>% 
   rename(
     applicant_ethnicity = applicant_ethnicity.1,
