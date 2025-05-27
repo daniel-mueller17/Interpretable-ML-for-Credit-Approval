@@ -47,7 +47,7 @@ data <- data %>%
                                "Yes"),
     co.applicant_credit_score_type = NULL # Not needed anymore
   )
-dim(data) # 11531 observations and 33 variables
+dim(data) # 11531 observations and 23 variables
 
 
 # Handling missing values and other special values
@@ -99,7 +99,7 @@ data$conforming_loan_limit <- replace_na(data$conforming_loan_limit, "unknown")
 sum(is.na(data$applicant_age_above_62)) # 420 NAs -> remove Data
 data <- drop_na(data, applicant_age_above_62)
 
-dim(data) # 11244 observations and 29 variables
+dim(data) # 11013 observations and 16 variables
 
 
 # Categorical variables to factors and numerical features to numerics
