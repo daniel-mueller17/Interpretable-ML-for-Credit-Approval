@@ -28,29 +28,22 @@ task$set_col_roles("action_taken", add_to = "stratum") # Target variable is kind
 
 learner <- lrn("classif.log_reg", predict_type = "prob")
 
-resampling = rsmp("holdout", ratio = 0.75)
+resampling = rsmp("subsampling", ratio = 0.8, repeats = 50)
 
-resampling$instantiate(task)
+measures <- msrs(c("classif.acc", "classif.precision", "classif.recall", "classif.specificity", "classif.fbeta", "classif.logloss"))
 
-measures <- msrs(c("classif.acc", "classif.precision", "classif.recall", "classif.fbeta", "classif.bbrier", "classif.logloss"))
-
-
-# Train and Test model
-learner$train(task, resampling$train_set(1))
-
-prediction <- learner$predict(task, resampling$test_set(1))
 
 # Evaluation of model
-confusion_matrix <- prediction$confusion
-evaluation <- prediction$score(measures)
+rr <- resample(task, learner, resampling)
 
-confusion_matrix
+evaluation <- rr$aggregate(measures)
+
 evaluation
 
 
 # Feature Importance
 loss_fi <- msr("classif.logloss")
-resampling_fi <- rsmp("subsampling", ratio = 0.75, repeats = 50)
+resampling_fi <- rsmp("subsampling", ratio = 0.8, repeats = 50)
 
 # LOCO
 res_loco <- loco(task, learner, resampling_fi, loss_fi)
@@ -90,12 +83,19 @@ loci_plot
 
 # Partial Dependence Plot
 
-credit_x = task$data(rows = resampling$test_set(1),
-                           cols = task$feature_names)
-credit_y = task$data(rows = resampling$test_set(1),
-                           cols = task$target_names)
-predictor <- Predictor$new(learner, data = credit_x, y = credit_y)
+# Train model for pdp
+splits = partition(task, ratio = 0.8)
+learner_pdp <- lrn("classif.log_reg", predict_type = "prob")
+learner_pdp$train(task, row_id = splits$train)
 
+
+credit_x = task$data(rows = splits$test,
+                           cols = task$feature_names)
+credit_y = task$data(rows = splits$test,
+                           cols = task$target_names)
+predictor <- Predictor$new(learner_pdp, data = credit_x, y = credit_y)
+
+# visualize pdps
 effect_debt <- FeatureEffect$new(predictor, feature = "debt_to_income_ratio", method = "pdp")
 effect_plot_debt <- effect_debt$results %>% 
   filter(.class == "Loan approved") %>% 
@@ -136,3 +136,11 @@ effect_plot_amount <- effect_amount$results %>%
   scale_x_continuous(labels = label_comma()) +
   facet_wrap(~"Loan approved")
 effect_plot_amount
+
+effect_lien <- FeatureEffect$new(predictor, feature = "lien_status", method = "pdp")
+effect_plot_lien <- effect_lien$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = lien_status, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_lien
