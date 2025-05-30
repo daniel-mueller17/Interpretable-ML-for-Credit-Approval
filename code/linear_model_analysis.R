@@ -8,9 +8,6 @@ library(iml)
 library(dplyr)
 library(scales)
 mlr_learners$get("classif.log_reg")
-mlr_measures$get("classif.precision")
-mlr_measures$get("classif.recall")
-mlr_measures$get("classif.fbeta")
 
 # Load functions to calculate LOCO and LOCI
 source("./code/loco_loci_function.R")
@@ -30,7 +27,7 @@ learner <- lrn("classif.log_reg", predict_type = "prob")
 
 resampling = rsmp("subsampling", ratio = 0.8, repeats = 50)
 
-measures <- msrs(c("classif.acc", "classif.precision", "classif.recall", "classif.specificity", "classif.fbeta", "classif.logloss"))
+measures <- msrs(c("classif.acc", "classif.precision", "classif.recall", "classif.specificity", "classif.fbeta", "classif.logloss", "classif.auc"))
 
 
 # Evaluation of model
@@ -120,6 +117,14 @@ effect_plot_race <- effect_race$results %>%
   facet_wrap(~"Loan approved")
 effect_plot_race
 
+effect_sex <- FeatureEffect$new(predictor, feature = "applicant_sex", method = "pdp")
+effect_plot_sex <- effect_sex$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = applicant_sex, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_sex
+
 effect_income <- FeatureEffect$new(predictor, feature = "income_log", method = "pdp")
 effect_plot_income <- effect_income$results %>% 
   filter(.class == "Loan approved") %>% 
@@ -144,3 +149,19 @@ effect_plot_lien <- effect_lien$results %>%
   geom_col(fill = "steelblue") +
   facet_wrap(~"Loan approved")
 effect_plot_lien
+
+effect_pre <- FeatureEffect$new(predictor, feature = "preapproval", method = "pdp")
+effect_plot_pre <- effect_pre$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = preapproval, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_pre
+
+effect_co <- FeatureEffect$new(predictor, feature = "has_co.applicant", method = "pdp")
+effect_plot_co <- effect_co$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = has_co.applicant, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_co
