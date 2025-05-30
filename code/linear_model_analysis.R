@@ -25,7 +25,7 @@ task$set_col_roles("action_taken", add_to = "stratum") # Target variable is kind
 
 learner <- lrn("classif.log_reg", predict_type = "prob")
 
-resampling = rsmp("subsampling", ratio = 0.8, repeats = 50)
+resampling = rsmp("subsampling", ratio = 0.75, repeats = 50)
 
 measures <- msrs(c("classif.acc", "classif.precision", "classif.recall", "classif.specificity", "classif.fbeta", "classif.logloss", "classif.auc"))
 
@@ -40,7 +40,7 @@ evaluation
 
 # Feature Importance
 loss_fi <- msr("classif.logloss")
-resampling_fi <- rsmp("subsampling", ratio = 0.8, repeats = 50)
+resampling_fi <- rsmp("subsampling", ratio = 0.75, repeats = 50)
 
 # LOCO
 res_loco <- loco(task, learner, resampling_fi, loss_fi)
@@ -81,7 +81,7 @@ loci_plot
 # Partial Dependence Plot
 
 # Train model for pdp
-splits = partition(task, ratio = 0.8)
+splits = partition(task, ratio = 0.75)
 learner_pdp <- lrn("classif.log_reg", predict_type = "prob")
 learner_pdp$train(task, row_id = splits$train)
 
