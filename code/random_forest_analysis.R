@@ -33,7 +33,7 @@ resampling = rsmp("subsampling", ratio = 0.75, repeats = 50)
 measures <- msrs(c("classif.acc", "classif.precision", "classif.recall", "classif.specificity", "classif.fbeta", "classif.bbrier", "classif.logloss", "classif.auc"))
 
 # Tuning
-search_space <- lts("classif.ranger.default", min.node.size = to_tune(1, 100)) # num.tress, replace, sample.fraction, mtry.ratio, min.node.size
+search_space <- lts("classif.ranger.default", min.node.size = to_tune(p_int(1, 100))) # num.tress, replace, sample.fraction, mtry.ratio, min.node.size
 
 tuner = tnr("random_search", batch_size = 100)
 
@@ -52,7 +52,7 @@ instance <- tune(
 )
 
 best_par <- instance$result_learner_param_vals
-# best min.nodes.size = 23, mtry.ratio = 0.885, num.random.splits = 12, num.trees = 750, replace = FALSE, respect.unordered.factors = "order", sample.fraction = 0.371, splitrule = "extratrees"
+# best min.nodes.size = 23, mtry.ratio = 0.375, num.trees = 1754, replace = TRUE, sample.fraction = 0.949
 
 learner_tuned <- lrn("classif.ranger", predict_type = "prob")
 learner_tuned$param_set$set_values(.values = best_par)
@@ -85,6 +85,9 @@ df_loci = data.frame(feature = names(res_loci),
                      type = "LOCI")
 
 future::plan("sequential")
+
+write.csv(df_loco, file = "./data/feature_importance/rf_loco.csv")
+write.csv(data, file = "./data/feature_importance/rf_loci.csv")
 
 # Plot results
 theme_set(theme_bw(base_size = 18))
