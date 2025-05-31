@@ -36,7 +36,7 @@ measures <- msrs(c("classif.acc", "classif.precision", "classif.recall", "classi
 
 search_space <- lts("classif.rpart.rbv2") # Tune over cp, maxdepth, minbucket, minsplit
 
-tuner = tnr("random_search", batch_size = 5)
+tuner = tnr("random_search", batch_size = 100)
 
 terminator <- trm("evals", n_evals = 500)
 
@@ -51,6 +51,10 @@ instance <- tune(
 )
 
 best_par <- instance$result_learner_param_vals
+# cp = 0.0014, maxdepth = 24, minbucket = 15, minsplit = 63
+
+# Save parameters
+write.csv(as.data.frame(best_par), file = "./data/hyperparameter_models/tree.csv")
 
 learner_tuned <- lrn("classif.rpart", predict_type = "prob")
 learner_tuned$param_set$set_values(.values = best_par)
@@ -77,6 +81,11 @@ res_loci = loci(task, learner_tuned, resampling, loss_fi)
 df_loci = data.frame(feature = names(res_loci),
                      importance = res_loci,
                      type = "LOCI")
+
+
+# Save values
+write.csv(df_loco, file = "./data/feature_importance/tree_loco.csv")
+write.csv(data, file = "./data/feature_importance/tree_loci.csv")
 
 # Plot results
 theme_set(theme_bw(base_size = 18))
@@ -192,3 +201,10 @@ effect_plot_co <- effect_co$results %>%
   facet_wrap(~"Loan approved")
 effect_plot_co
 
+effect_conforming <- FeatureEffect$new(predictor, feature = "conforming_loan_limit", method = "pdp")
+effect_plot_conforming <- effect_conforming$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = conforming_loan_limit, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_conforming
