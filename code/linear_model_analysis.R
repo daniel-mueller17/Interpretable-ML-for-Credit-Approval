@@ -54,6 +54,11 @@ df_loci = data.frame(feature = names(res_loci),
                      importance = res_loci,
                      type = "LOCI")
 
+
+# Save values
+write.csv(df_loco, file = "./data/feature_importance/linear_loco.csv")
+write.csv(data, file = "./data/feature_importance/linear_loci.csv")
+
 # Plot results
 theme_set(theme_bw(base_size = 18))
 
