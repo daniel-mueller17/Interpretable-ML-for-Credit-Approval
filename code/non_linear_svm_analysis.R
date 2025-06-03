@@ -45,16 +45,17 @@ learner_pipe <- as_learner(factor_pipeline %>>% learner)
 learner_pipe$id <- "learner_pipe"
 
 # Tuning
-search_space <- ps(cost = p_dbl(lower = 0, upper = 8), # cost (For computational reasons only 0 to 8)
-                   gamma = p_dbl(lower = 0, upper = 6, depends = (kernel == "radial")), # gamma (For computational reasons only 0 to 6)
-                   degree = p_int(lower = 2, upper = 6, depends = (kernel == "polynomial")), # degree (For computational reasons only 2 to 6)
-                   kernel = p_fct(c("radial", "polynomial"))) 
+search_space <- ps(cost = p_dbl(lower = 1e-6, upper = 1e6, logscale = TRUE), # cost
+                   gamma = p_dbl(lower = 1e-06, upper = 1e6, logscale = TRUE), # gamma
+                   degree = p_int(lower = 2, upper = 5, depends = (kernel == "polynomial")), # degree (For computational reasons only 2 to 5)
+                   coef0 = p_int(lower = 0, upper = 1, depends = (kernel %in% c("polynomial", "sigmoid"))), # coeff0
+                   kernel = p_fct(c("radial", "polynomial", "sigmoid"))) # kernel
 
-tuner = tnr("random_search", batch_size = 100)
+tuner = tnr("random_search", batch_size = 150)
 
-terminator <- trm("evals", n_evals = 500)
+terminator <- trm("evals", n_evals = 600)
 
-future::plan("multisession", workers = 10)
+future::plan("multisession", workers = 15)
 
 instance <- tune(
   task = task,
@@ -67,10 +68,10 @@ instance <- tune(
 )
 
 best_par <- instance$result_learner_param_vals
-# cost = 7.03, kernel = "radial", gamma = 2.96
+# cost = 7.04, kernel = "radial", gamma = 2.96
 
 # Save parameters
-write.csv(as.data.frame(best_par[6:8]), file = "./data/hyperparameter_models/non_linear_svm.csv")
+write.csv(as.data.frame(best_par[6:9]), file = "./data/hyperparameter_models/non_linear_svm.csv")
 
 learner_tuned <- as_learner(factor_pipeline %>>% learner)
 learner_tuned$param_set$set_values(classif.svm.cost = best_par$cost)
@@ -78,6 +79,8 @@ learner_tuned$param_set$set_values(classif.svm.kernel = best_par$kernel)
 learner_tuned$param_set$set_values(classif.svm.gamma = best_par$gamma)
 
 # Evolution of model
+set.seed(456)
+
 rr <- resample(task, learner_tuned, resampling)
 
 future::plan("sequential")
@@ -87,3 +90,153 @@ evaluation <- rr$aggregate(measures)
 evaluation
 
 write.csv(as.data.frame(evaluation), file = "./data/performance_models/non_linear_svm.csv")
+
+
+# Feature Importance
+loss_fi <- msr("classif.logloss")
+resampling_fi = rsmp("subsampling", ratio = 0.75, repeats = 30) # For computational reasons only 30 repeats
+
+set.seed(789)
+
+future::plan("multisession", workers = 15)
+
+# LOCO
+res_loco <- loco(task, learner_tuned, resampling_fi, loss_fi)
+df_loco = data.frame(feature = names(res_loco),
+                     importance = res_loco,
+                     type = "LOCO")
+
+# LOCI
+res_loci = loci(task, learner_tuned, resampling_fi, loss_fi)
+df_loci = data.frame(feature = names(res_loci),
+                     importance = res_loci,
+                     type = "LOCI")
+
+future::plan("sequential")
+
+
+# Save values
+write.csv(df_loco, file = "./data/feature_importance/linear_svm_loco.csv")
+write.csv(data, file = "./data/feature_importance/linear_svm_loci.csv")
+
+# Plot results
+theme_set(theme_bw(base_size = 18))
+
+loco_plot = df_loco %>% 
+  ggplot(aes(x = importance, y = fct_reorder(feature, importance))) +
+  geom_col(position = "identity", fill = "steelblue") +
+  labs(
+    title = "LOCO",
+    y = "features",
+    x = "importance"
+  )
+loco_plot
+
+loci_plot = df_loci %>% 
+  ggplot(aes(x = importance, y = fct_reorder(feature, importance))) +
+  geom_col(position = "identity", fill = "steelblue") +
+  labs(
+    title = "LOCI",
+    y = "features",
+    x = "importance"
+  )
+loci_plot
+
+
+# Partial Dependence Plot
+
+# Train model for pdp
+splits = partition(task, ratio = 0.75)
+learner_pdp<- as_learner(factor_pipeline %>>% learner)
+learner_pdp$param_set$set_values(classif.svm.cost = best_par$cost)
+learner_pdp$train(task, row_id = splits$train)
+
+
+credit_x = task$data(rows = splits$test,
+                     cols = task$feature_names)
+credit_y = task$data(rows = splits$test,
+                     cols = task$target_names)
+predictor <- Predictor$new(learner_pdp, data = credit_x, y = credit_y)
+
+# visualize pdps
+effect_debt <- FeatureEffect$new(predictor, feature = "debt_to_income_ratio", method = "pdp")
+effect_plot_debt <- effect_debt$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = debt_to_income_ratio, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_debt
+
+effect_purpose <- FeatureEffect$new(predictor, feature = "loan_purpose", method = "pdp")
+effect_plot_purpose <- effect_purpose$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = loan_purpose, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_purpose
+
+effect_race <- FeatureEffect$new(predictor, feature = "applicant_race", method = "pdp")
+effect_plot_race <- effect_race$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = applicant_race, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_race
+
+effect_eth <- FeatureEffect$new(predictor, feature = "applicant_ethnicity", method = "pdp")
+effect_plot_eth <- effect_eth$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = applicant_ethnicity, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_eth
+
+effect_sex <- FeatureEffect$new(predictor, feature = "applicant_sex", method = "pdp")
+effect_plot_sex <- effect_sex$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = applicant_sex, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_sex
+
+effect_lien <- FeatureEffect$new(predictor, feature = "lien_status", method = "pdp")
+effect_plot_lien <- effect_lien$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = lien_status, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_lien
+
+effect_co <- FeatureEffect$new(predictor, feature = "has_co.applicant", method = "pdp")
+effect_plot_co <- effect_co$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = has_co.applicant, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_co
+
+effect_income <- FeatureEffect$new(predictor, feature = "income_log", method = "pdp")
+effect_plot_income <- effect_income$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = income_log, y = .value)) +
+  geom_line() +
+  facet_wrap(~"Loan approved")
+effect_plot_income
+
+effect_amount <- FeatureEffect$new(predictor, feature = "loan_amount_log", method = "pdp")
+effect_plot_amount <- effect_amount$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = loan_amount_log, y = .value)) +
+  geom_line() +
+  scale_x_continuous(labels = label_comma()) +
+  facet_wrap(~"Loan approved")
+effect_plot_amount
+
+effect_property <- FeatureEffect$new(predictor, feature = "property_value_log", method = "pdp")
+effect_plot_property <- effect_property$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = property_value_log, y = .value)) +
+  geom_line() +
+  scale_x_continuous(labels = label_comma()) +
+  facet_wrap(~"Loan approved")
+effect_plot_property
