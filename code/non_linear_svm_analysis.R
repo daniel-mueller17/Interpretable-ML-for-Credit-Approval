@@ -27,7 +27,7 @@ set.seed(123)
 task <- as_task_classif(data, target = "action_taken", positve = "Loan approved", id = "credit_approval")
 task$set_col_roles("action_taken", add_to = "stratum") # Target variable is kind of imbalanced -> stratify
 
-learner <- lrn("classif.svm", predict_type = "prob", kernel = "radial", type = "C-classification")
+learner <- lrn("classif.svm", predict_type = "prob", type = "C-classification")
 
 resampling = rsmp("subsampling", ratio = 0.75, repeats = 50)
 
@@ -46,11 +46,13 @@ learner_pipe$id <- "learner_pipe"
 
 # Tuning
 search_space <- ps(cost = p_dbl(lower = 0, upper = 8), # cost (For computational reasons only 0 to 8)
-                   gamma = p_dbl(lower = 0, upper = 10)) # gamma (For computational reasons only 0 to 10)
+                   gamma = p_dbl(lower = 0, upper = 6, depends = (kernel == "radial")), # gamma (For computational reasons only 0 to 6)
+                   degree = p_int(lower = 2, upper = 6, depends = (kernel == "polynomial")), # degree (For computational reasons only 2 to 6)
+                   kernel = p_fct(c("radial", "polynomial"))) 
 
 tuner = tnr("random_search", batch_size = 100)
 
-terminator <- trm("evals", n_evals = 200)
+terminator <- trm("evals", n_evals = 500)
 
 future::plan("multisession", workers = 10)
 
@@ -65,4 +67,23 @@ instance <- tune(
 )
 
 best_par <- instance$result_learner_param_vals
-#
+# cost = 7.03, kernel = "radial", gamma = 2.96
+
+# Save parameters
+write.csv(as.data.frame(best_par[6:8]), file = "./data/hyperparameter_models/non_linear_svm.csv")
+
+learner_tuned <- as_learner(factor_pipeline %>>% learner)
+learner_tuned$param_set$set_values(classif.svm.cost = best_par$cost)
+learner_tuned$param_set$set_values(classif.svm.kernel = best_par$kernel)
+learner_tuned$param_set$set_values(classif.svm.gamma = best_par$gamma)
+
+# Evolution of model
+rr <- resample(task, learner_tuned, resampling)
+
+future::plan("sequential")
+
+evaluation <- rr$aggregate(measures)
+
+evaluation
+
+write.csv(as.data.frame(evaluation), file = "./data/performance_models/non_linear_svm.csv")
