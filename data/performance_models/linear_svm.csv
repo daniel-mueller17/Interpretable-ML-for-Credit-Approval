@@ -1,9 +1,9 @@
 "","evaluation"
-"classif.acc",0.824155466763531
-"classif.precision",0.846890419985633
-"classif.recall",0.932327964860908
-"classif.specificity",0.509318181818182
-"classif.fbeta",0.887546046117875
-"classif.bbrier",0.141892977590491
-"classif.logloss",0.454935619829555
-"classif.auc",0.807891917897866
+"classif.acc",0.823654195423175
+"classif.precision",0.846154083907788
+"classif.recall",0.932708638360176
+"classif.specificity",0.50625
+"classif.fbeta",0.887299963476172
+"classif.bbrier",0.141881311630521
+"classif.logloss",0.45451832971048
+"classif.auc",0.839149391055504

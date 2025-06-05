@@ -4,6 +4,6 @@
 "classif.recall",0.943621278672523
 "classif.specificity",0.510454545454545
 "classif.fbeta",0.89364952345977
-"classif.bbrier",0.12016325821795
-"classif.logloss",0.394722235689635
+"classif.bbrier",0.120163258217947
+"classif.logloss",0.394722235689626
 "classif.auc",0.859624498092196

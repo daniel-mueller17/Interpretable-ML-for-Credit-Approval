@@ -45,11 +45,11 @@ learner_pipe <- as_learner(factor_pipeline %>>% learner)
 learner_pipe$id <- "learner_pipe"
 
 # Tuning
-search_space <- ps(cost = p_dbl(lower = 0, upper = 8)) # cost (For computational reasons only 0 to 8)
+search_space <- ps(cost = p_dbl(lower = 1e-6, upper = 1e6, logscale = TRUE)) # cost
 
 tuner = tnr("random_search", batch_size = 100)
 
-terminator <- trm("evals", n_evals = 100)
+terminator <- trm("evals", n_evals = 200)
 
 future::plan("multisession", workers = 10)
 
@@ -64,7 +64,7 @@ instance <- tune(
 )
 
 best_par <- instance$result_learner_param_vals
-# cost = 2.8
+# cost = 0.016
 
 # Save parameters
 write.csv(as.data.frame(best_par[5:6]), file = "./data/hyperparameter_models/linear_svm.csv")
@@ -73,6 +73,8 @@ learner_tuned <- as_learner(factor_pipeline %>>% learner)
 learner_tuned$param_set$set_values(classif.svm.cost = best_par$cost)
 
 # Evolution of model
+set.seed(456)
+
 rr <- resample(task, learner_tuned, resampling)
 
 future::plan("sequential")
@@ -88,7 +90,7 @@ write.csv(as.data.frame(evaluation), file = "./data/performance_models/linear_sv
 loss_fi <- msr("classif.logloss")
 resampling_fi = rsmp("subsampling", ratio = 0.75, repeats = 30) # For computational reasons only 30 repeats
 
-set.seed(456)
+set.seed(789)
 
 future::plan("multisession", workers = 10)
 

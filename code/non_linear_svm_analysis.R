@@ -68,7 +68,7 @@ instance <- tune(
 )
 
 best_par <- instance$result_learner_param_vals
-# cost = 7.04, kernel = "radial", gamma = 2.96
+# cost = 0.00017, kernel = "sigmoid", gamma = 0.0053, coeff0 = 1
 
 # Save parameters
 write.csv(as.data.frame(best_par[6:9]), file = "./data/hyperparameter_models/non_linear_svm.csv")

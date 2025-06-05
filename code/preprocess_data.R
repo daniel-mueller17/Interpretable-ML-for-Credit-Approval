@@ -156,6 +156,12 @@ data <- data %>%
 
 
 # Transformation of various variables
+data <- data %>% 
+  mutate(
+    property_value = property_value/1000,
+    loan_amount = loan_amount/1000
+  )
+
 data %>% 
   ggplot(aes(x = income)) +
   geom_density() # heavy skewed -> log transformation
@@ -172,10 +178,11 @@ data %>%
 table(data$loan_amount <= 0) # No value <= 0
 
 data <- data %>% 
-  mutate(income_log = if_else(income < 0, 0, income),
-         income_log = log1p(income_log),
-         property_value_log = log(property_value),
-         loan_amount_log = log(loan_amount)
+  mutate(
+    income_log = if_else(income < 0, 0, income),
+    income_log = log1p(income_log),
+    property_value_log = log(property_value),
+    loan_amount_log = log(loan_amount)
   )
 
 # We dont need to original variables any longer
