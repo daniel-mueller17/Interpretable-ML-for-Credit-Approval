@@ -12,4 +12,4 @@ set.seed(123)
 tree <- rpart(action_taken ~ ., data = data, method = "class")
 
 # Plot Tree
-rpart.plot(tree, main = "Decision Tree", extra = 4)
+rpart.plot(tree, main = "Decision Tree", extra = 4, yesno = 2, fallen.leaves = TRUE, split.border.col = 0)
