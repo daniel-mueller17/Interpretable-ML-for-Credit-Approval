@@ -167,6 +167,14 @@ effect_plot_sex <- effect_sex$results %>%
   facet_wrap(~"Loan approved")
 effect_plot_sex
 
+effect_eth <- FeatureEffect$new(predictor, feature = "applicant_ethnicity", method = "pdp")
+effect_plot_eth <- effect_eth$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = applicant_ethnicity, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_eth
+
 effect_income <- FeatureEffect$new(predictor, feature = "income_log", method = "pdp")
 effect_plot_income <- effect_income$results %>% 
   filter(.class == "Loan approved") %>% 
@@ -208,3 +216,11 @@ effect_plot_conforming <- effect_conforming$results %>%
   geom_col(fill = "steelblue") +
   facet_wrap(~"Loan approved")
 effect_plot_conforming
+
+effect_occ <- FeatureEffect$new(predictor, feature = "occupancy_type", method = "pdp")
+effect_plot_occ <- effect_occ$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = occupancy_type, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_occ

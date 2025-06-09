@@ -111,7 +111,7 @@ data <- data %>%
          loan_purpose = if_else(loan_purpose == 1, "Home purchase",
                                 if_else(loan_purpose == 2, "Home improvement",
                                         if_else(loan_purpose == 31, "Refinancing",
-                                                if_else(loan_purpose == 32, "Cash-out refinancing", "Other purpose")))),
+                                                if_else(loan_purpose == 32, "Cash-out", "Other purpose")))),
          lien_status = if_else(lien_status == 1, "Secured by a first lien", "Secured by a subordinate lien"),
          occupancy_type = if_else(occupancy_type == 1, "Principal residence",
                                   if_else(occupancy_type == 2, "Second residence", "Investment property")),
@@ -129,23 +129,26 @@ data <- data %>%
                                  if_else(applicant_sex == 1, "Male", "Female"))
   ) %>% 
   rename(
-    applicant_ethnicity = applicant_ethnicity.1,
-    applicant_race = applicant_race.1,
+    ethnicity = applicant_ethnicity.1,
+    race = applicant_race.1,
+    sex = applicant_sex,
+    age_above_62 = applicant_age_above_62,
+    debt_income_ratio = debt_to_income_ratio
   )
 
 data <- data %>% 
   mutate(
-    applicant_ethnicity = as.factor(applicant_ethnicity),
-    applicant_race = as.factor(applicant_race),
-    applicant_sex = as.factor(applicant_sex),
-    applicant_age_above_62 = as.factor(applicant_age_above_62),
+    ethnicity = as.factor(ethnicity),
+    race = as.factor(race),
+    sex = as.factor(sex),
+    age_above_62 = as.factor(age_above_62),
     action_taken = as.factor(action_taken),
     preapproval = as.factor(preapproval),
     loan_type = as.factor(loan_type),
     loan_purpose = as.factor(loan_purpose),
     lien_status = as.factor(lien_status),
     occupancy_type = as.factor(occupancy_type),
-    debt_to_income_ratio = factor(debt_to_income_ratio,
+    debt_income_ratio = factor(debt_income_ratio,
                                   levels = c("<20%", "20%-29%", "30%-35%", "36%-42%", "43%-49%", "50%-60%", ">60%", "unknown")),
     income = as.numeric(income),
     loan_amount = as.numeric(loan_amount),
@@ -179,16 +182,11 @@ table(data$loan_amount <= 0) # No value <= 0
 
 data <- data %>% 
   mutate(
-    income_log = if_else(income < 0, 0, income),
-    income_log = log1p(income_log),
-    property_value_log = log(property_value),
-    loan_amount_log = log(loan_amount)
+    income = if_else(income < 0, 0, income),
+    income = log1p(income),
+    property_value = log(property_value),
+    loan_amount = log(loan_amount)
   )
-
-# We dont need to original variables any longer
-data$income <- NULL
-data$property_value <- NULL
-data$loan_amount <- NULL
 
 
 # Save preprocessed data

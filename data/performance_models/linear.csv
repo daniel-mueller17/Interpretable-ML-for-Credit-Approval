@@ -1,0 +1,2 @@
+Accuracy,Precision,Recall,Specificity,F1-score,log loss
+0.838,0.854,0.944,0.532,0.897,0.37
