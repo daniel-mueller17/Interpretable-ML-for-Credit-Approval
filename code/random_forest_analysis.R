@@ -98,22 +98,22 @@ write.csv(data, file = "./data/feature_importance/rf_loci.csv")
 theme_set(theme_bw(base_size = 18))
 
 loco_plot = df_loco %>% 
-  ggplot(aes(x = importance, y = fct_reorder(feature, importance))) +
+  ggplot(aes(x = importance/max(importance), y = fct_reorder(feature, importance))) +
   geom_col(position = "identity", fill = "steelblue") +
   labs(
     title = "LOCO",
-    y = "features",
-    x = "importance"
+    y = "Features",
+    x = "Importance"
   )
 loco_plot
 
 loci_plot = df_loci %>% 
-  ggplot(aes(x = importance, y = fct_reorder(feature, importance))) +
+  ggplot(aes(x = importance/max(importance), y = fct_reorder(feature, importance))) +
   geom_col(position = "identity", fill = "steelblue") +
   labs(
     title = "LOCI",
-    y = "features",
-    x = "importance"
+    y = "Features",
+    x = "Importance"
   )
 loci_plot
 
