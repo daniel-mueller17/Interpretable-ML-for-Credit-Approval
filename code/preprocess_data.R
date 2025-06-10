@@ -59,10 +59,10 @@ data <- data %>%
 data$tract_to_msa_income_percentage <- NULL # Not needed anymore
 
 sum(is.na(data$debt_to_income_ratio)) # 855 NAs -> new category "unknown"
-data$debt_to_income_ratio <- replace_na(data$debt_to_income_ratio, "unknown")
+data$debt_to_income_ratio <- replace_na(data$debt_to_income_ratio, "Unknown")
 sum(data$debt_to_income_ratio == "Exempt") # 144 obs. -> also unknown
 data <- data %>%  mutate(
-  debt_to_income_ratio = if_else(debt_to_income_ratio == "Exempt", "unknown", debt_to_income_ratio))
+  debt_to_income_ratio = if_else(debt_to_income_ratio == "Exempt", "Unknown", debt_to_income_ratio))
 
 sum(is.na(data$property_value)) # 419 NAs -> impute values with median groubed by "total_units"
 data$property_value <- as.numeric(data$property_value)
@@ -94,7 +94,7 @@ sum(is.na(data$discount_points)) # 4683 NAs -> same with interest_rate
 data$discount_points <- NULL
 
 sum(is.na(data$conforming_loan_limit)) # 138 NAs -> new category "unknown"
-data$conforming_loan_limit <- replace_na(data$conforming_loan_limit, "unknown")
+data$conforming_loan_limit <- replace_na(data$conforming_loan_limit, "Unknown")
 
 sum(is.na(data$applicant_age_above_62)) # 420 NAs -> remove Data
 data <- drop_na(data, applicant_age_above_62)
@@ -121,11 +121,11 @@ data <- data %>%
          debt_to_income_ratio = if_else(debt_to_income_ratio == "20%-<30%", "20%-29%",
                                         if_else(debt_to_income_ratio == "30%-<36%", "30%-35%", debt_to_income_ratio)),
          applicant_ethnicity.1 = if_else(applicant_ethnicity.1 %in% c(1, 11, 12, 13, 14), "Hispanic or Latino",
-                                         if_else(applicant_ethnicity.1 == 2, "Not Hispanic or Latino", "unknwon")),
+                                         if_else(applicant_ethnicity.1 == 2, "Not Hispanic or Latino", "Unknwon")),
          applicant_race.1 = if_else(applicant_race.1 %in% c(2, 21, 22, 23, 24, 25, 26, 27), "Asian",
                                     if_else(applicant_race.1 == 3, "Black or African American",
-                                            if_else(applicant_race.1 == 5, "White", "other"))),
-         applicant_sex = if_else(applicant_sex %in% c(3, 4, 6), "unknown",
+                                            if_else(applicant_race.1 == 5, "White", "Other"))),
+         applicant_sex = if_else(applicant_sex %in% c(3, 4, 6), "Unknown",
                                  if_else(applicant_sex == 1, "Male", "Female"))
   ) %>% 
   rename(
@@ -139,17 +139,19 @@ data <- data %>%
 data <- data %>% 
   mutate(
     ethnicity = as.factor(ethnicity),
-    race = as.factor(race),
+    race = factor(race,
+                  levels = c("Asian", "Black or African American", "White", "Other")),
     sex = as.factor(sex),
     age_above_62 = as.factor(age_above_62),
     action_taken = as.factor(action_taken),
     preapproval = as.factor(preapproval),
     loan_type = as.factor(loan_type),
-    loan_purpose = as.factor(loan_purpose),
+    loan_purpose = factor(loan_purpose,
+                          levels = c("Home improvement", "Cash-out", "Home purchase", "Refinancing", "Other purpose")),
     lien_status = as.factor(lien_status),
     occupancy_type = as.factor(occupancy_type),
     debt_income_ratio = factor(debt_income_ratio,
-                                  levels = c("<20%", "20%-29%", "30%-35%", "36%-42%", "43%-49%", "50%-60%", ">60%", "unknown")),
+                                  levels = c("<20%", "20%-29%", "30%-35%", "36%-42%", "43%-49%", "50%-60%", ">60%", "Unknown")),
     income = as.numeric(income),
     loan_amount = as.numeric(loan_amount),
     property_value = as.numeric(property_value),

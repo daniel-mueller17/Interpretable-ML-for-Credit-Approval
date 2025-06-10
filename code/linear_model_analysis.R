@@ -108,7 +108,7 @@ credit_y = task$data(rows = splits$test,
 predictor <- Predictor$new(learner_pdp, data = credit_x, y = credit_y)
 
 # visualize pdps
-theme_set(theme_bw(base_size = 20))
+theme_set(theme_bw(base_size = 19))
 
 effect_debt <- FeatureEffect$new(predictor, feature = "debt_income_ratio", method = "pdp")
 effect_plot_debt <- effect_debt$results %>% 
@@ -128,7 +128,7 @@ effect_plot_purpose <- effect_purpose$results %>%
   ggplot(aes(x = loan_purpose, y = .value)) +
   geom_col(fill = "steelblue") +
   labs(
-    y = "Predicted probability",
+    y = element_blank(),
     x = element_blank()
   ) +
   ylim(0, 1)
@@ -185,7 +185,7 @@ effect_plot_pre <- effect_pre$results %>%
   ggplot(aes(x = preapproval, y = .value)) +
   geom_col(fill = "steelblue") +
   labs(
-    y = "Predicted probability",
+    y = element_blank(),
     x = element_blank()
   ) +
   ylim(0, 1)
