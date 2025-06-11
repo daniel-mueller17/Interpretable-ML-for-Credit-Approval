@@ -1,2 +1,2 @@
 "","num.threads","min.node.size","mtry.ratio","num.trees","replace","sample.fraction"
-"1",1,20,0.375021307962015,877,TRUE,0.948917130241171
+"1",1,14,0.489723021397367,719,TRUE,0.435940236155875

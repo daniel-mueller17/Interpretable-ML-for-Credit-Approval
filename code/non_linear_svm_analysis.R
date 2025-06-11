@@ -31,7 +31,7 @@ learner <- lrn("classif.svm", predict_type = "prob", type = "C-classification")
 
 resampling = rsmp("subsampling", ratio = 0.75, repeats = 50)
 
-measures <- msrs(c("classif.acc", "classif.precision", "classif.recall", "classif.specificity", "classif.fbeta", "classif.bbrier", "classif.logloss", "classif.auc"))
+measures <- msrs(c("classif.acc", "classif.precision", "classif.recall", "classif.specificity", "classif.fbeta", "classif.logloss", "classif.auc"))
 
 # Set up pipeline to encode factors
 factor_pipeline <- 
