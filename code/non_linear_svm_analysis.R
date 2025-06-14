@@ -153,6 +153,8 @@ ggsave(file = "./plots/non_linear_svm/loci.pdf", plot = loci_plot)
 # Partial Dependence Plot
 
 # Train model for pdp
+set.seed(247)
+
 splits = partition(task, ratio = 0.75)
 learner_pdp<- as_learner(factor_pipeline %>>% learner)
 learner_pdp$param_set$set_values(classif.svm.cost = best_par$cost)
@@ -166,12 +168,18 @@ credit_y = task$data(rows = splits$test,
 predictor <- Predictor$new(learner_pdp, data = credit_x, y = credit_y)
 
 # visualize pdps
+theme_set(theme_bw(base_size = 19))
+
 effect_debt <- FeatureEffect$new(predictor, feature = "debt_income_ratio", method = "pdp")
 effect_plot_debt <- effect_debt$results %>% 
   filter(.class == "Loan approved") %>% 
   ggplot(aes(x = debt_income_ratio, y = .value)) +
   geom_col(fill = "steelblue") +
-  facet_wrap(~"Loan approved")
+  labs(
+    y = "Predicted probability",
+    x = element_blank()
+  ) +
+  ylim(0, 1)
 effect_plot_debt
 
 effect_purpose <- FeatureEffect$new(predictor, feature = "loan_purpose", method = "pdp")
@@ -179,7 +187,11 @@ effect_plot_purpose <- effect_purpose$results %>%
   filter(.class == "Loan approved") %>% 
   ggplot(aes(x = loan_purpose, y = .value)) +
   geom_col(fill = "steelblue") +
-  facet_wrap(~"Loan approved")
+  labs(
+    y = element_blank(),
+    x = element_blank()
+  ) +
+  ylim(0, 1)
 effect_plot_purpose
 
 effect_race <- FeatureEffect$new(predictor, feature = "race", method = "pdp")
@@ -211,7 +223,11 @@ effect_plot_lien <- effect_lien$results %>%
   filter(.class == "Loan approved") %>% 
   ggplot(aes(x = lien_status, y = .value)) +
   geom_col(fill = "steelblue") +
-  facet_wrap(~"Loan approved")
+  labs(
+    y = element_blank(),
+    x = element_blank()
+  ) +
+  ylim(0, 1)
 effect_plot_lien
 
 effect_co <- FeatureEffect$new(predictor, feature = "has_co.applicant", method = "pdp")
@@ -236,7 +252,11 @@ effect_plot_amount <- effect_amount$results %>%
   ggplot(aes(x = loan_amount, y = .value)) +
   geom_line() +
   scale_x_continuous(labels = label_comma()) +
-  facet_wrap(~"Loan approved")
+  labs(
+    y = "Predicted probability",
+    x = element_blank()
+  ) +
+  ylim(0, 1)
 effect_plot_amount
 
 effect_property <- FeatureEffect$new(predictor, feature = "property_value", method = "pdp")
@@ -247,3 +267,17 @@ effect_plot_property <- effect_property$results %>%
   scale_x_continuous(labels = label_comma()) +
   facet_wrap(~"Loan approved")
 effect_plot_property
+
+effect_pre <- FeatureEffect$new(predictor, feature = "preapproval", method = "pdp")
+effect_plot_pre <- effect_pre$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = preapproval, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_pre
+
+# Save plots
+ggsave(file = "./plots/non_linear_svm/effect_debt.pdf", plot = effect_plot_debt)
+ggsave(file = "./plots/non_linear_svm/effect_purpose.pdf", plot = effect_plot_purpose)
+ggsave(file = "./plots/non_linear_svm/effect_lien.pdf", plot = effect_plot_lien)
+ggsave(file = "./plots/non_linear_svm/effect_amount.pdf", plot = effect_plot_amount)
