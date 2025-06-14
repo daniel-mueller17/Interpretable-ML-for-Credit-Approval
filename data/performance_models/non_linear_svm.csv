@@ -1,9 +1,2 @@
-"","evaluation"
-"classif.acc",0.832851434798402
-"classif.precision",0.848745245413466
-"classif.recall",0.943621278672523
-"classif.specificity",0.510454545454545
-"classif.fbeta",0.89364952345977
-"classif.bbrier",0.120163258217947
-"classif.logloss",0.394722235689626
-"classif.auc",0.859624498092196
+Accuracy,Precision,Recall,Specificity,F1-score,log loss
+0.833,0.849,0.944,0.51,0.894,0.395

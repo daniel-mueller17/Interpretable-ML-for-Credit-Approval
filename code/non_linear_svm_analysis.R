@@ -48,7 +48,7 @@ learner_pipe$id <- "learner_pipe"
 search_space <- ps(cost = p_dbl(lower = 1e-6, upper = 1e6, logscale = TRUE), # cost
                    gamma = p_dbl(lower = 1e-06, upper = 1e6, logscale = TRUE), # gamma
                    degree = p_int(lower = 2, upper = 5, depends = (kernel == "polynomial")), # degree (For computational reasons only 2 to 5)
-                   coef0 = p_int(lower = 0, upper = 1, depends = (kernel %in% c("polynomial", "sigmoid"))), # coeff0
+                   coef0 = p_int(lower = 0, upper = 1, depends = (kernel %in% c("polynomial", "sigmoid"))), # coef0
                    kernel = p_fct(c("radial", "polynomial", "sigmoid"))) # kernel
 
 tuner = tnr("random_search", batch_size = 150)
@@ -87,27 +87,30 @@ future::plan("sequential")
 
 evaluation <- rr$aggregate(measures)
 
+evaluation <- data.frame(as.list(round(evaluation, 3)))
+
+names(evaluation) <- c("Accuracy", "Precision", "Recall", "Specificity", "F1-score", "log loss", "AUC")
+
 evaluation
 
-write.csv(as.data.frame(evaluation), file = "./data/performance_models/non_linear_svm.csv")
+write.csv(evaluation[1:6], file = "./data/performance_models/non_linear_svm.csv", row.names = FALSE, quote = FALSE)
 
 
 # Feature Importance
 loss_fi <- msr("classif.logloss")
-resampling_fi = rsmp("subsampling", ratio = 0.75, repeats = 30) # For computational reasons only 30 repeats
 
 set.seed(789)
 
 future::plan("multisession", workers = 15)
 
 # LOCO
-res_loco <- loco(task, learner_tuned, resampling_fi, loss_fi)
+res_loco <- loco(task, learner_tuned, resampling, loss_fi)
 df_loco = data.frame(feature = names(res_loco),
                      importance = res_loco,
                      type = "LOCO")
 
 # LOCI
-res_loci = loci(task, learner_tuned, resampling_fi, loss_fi)
+res_loci = loci(task, learner_tuned, resampling, loss_fi)
 df_loci = data.frame(feature = names(res_loci),
                      importance = res_loci,
                      type = "LOCI")
@@ -116,11 +119,11 @@ future::plan("sequential")
 
 
 # Save values
-write.csv(df_loco, file = "./data/feature_importance/linear_svm_loco.csv")
-write.csv(data, file = "./data/feature_importance/linear_svm_loci.csv")
+write.csv(df_loco, file = "./data/feature_importance/non_linear_svm_loco.csv")
+write.csv(df_loci, file = "./data/feature_importance/non_linear_svm_loci.csv")
 
 # Plot results
-theme_set(theme_bw(base_size = 18))
+theme_set(theme_bw(base_size = 28))
 
 loco_plot = df_loco %>% 
   ggplot(aes(x = importance/max(importance), y = fct_reorder(feature, importance))) +
@@ -137,10 +140,14 @@ loci_plot = df_loci %>%
   geom_col(position = "identity", fill = "steelblue") +
   labs(
     title = "LOCI",
-    y = "Features",
+    y = element_blank(),
     x = "Importance"
   )
 loci_plot
+
+# Save plots
+ggsave(file = "./plots/non_linear_svm/loco.pdf", plot = loco_plot)
+ggsave(file = "./plots/non_linear_svm/loci.pdf", plot = loci_plot)
 
 
 # Partial Dependence Plot
@@ -159,10 +166,10 @@ credit_y = task$data(rows = splits$test,
 predictor <- Predictor$new(learner_pdp, data = credit_x, y = credit_y)
 
 # visualize pdps
-effect_debt <- FeatureEffect$new(predictor, feature = "debt_to_income_ratio", method = "pdp")
+effect_debt <- FeatureEffect$new(predictor, feature = "debt_income_ratio", method = "pdp")
 effect_plot_debt <- effect_debt$results %>% 
   filter(.class == "Loan approved") %>% 
-  ggplot(aes(x = debt_to_income_ratio, y = .value)) +
+  ggplot(aes(x = debt_income_ratio, y = .value)) +
   geom_col(fill = "steelblue") +
   facet_wrap(~"Loan approved")
 effect_plot_debt
@@ -175,26 +182,26 @@ effect_plot_purpose <- effect_purpose$results %>%
   facet_wrap(~"Loan approved")
 effect_plot_purpose
 
-effect_race <- FeatureEffect$new(predictor, feature = "applicant_race", method = "pdp")
+effect_race <- FeatureEffect$new(predictor, feature = "race", method = "pdp")
 effect_plot_race <- effect_race$results %>% 
   filter(.class == "Loan approved") %>% 
-  ggplot(aes(x = applicant_race, y = .value)) +
+  ggplot(aes(x = race, y = .value)) +
   geom_col(fill = "steelblue") +
   facet_wrap(~"Loan approved")
 effect_plot_race
 
-effect_eth <- FeatureEffect$new(predictor, feature = "applicant_ethnicity", method = "pdp")
+effect_eth <- FeatureEffect$new(predictor, feature = "ethnicity", method = "pdp")
 effect_plot_eth <- effect_eth$results %>% 
   filter(.class == "Loan approved") %>% 
-  ggplot(aes(x = applicant_ethnicity, y = .value)) +
+  ggplot(aes(x = ethnicity, y = .value)) +
   geom_col(fill = "steelblue") +
   facet_wrap(~"Loan approved")
 effect_plot_eth
 
-effect_sex <- FeatureEffect$new(predictor, feature = "applicant_sex", method = "pdp")
+effect_sex <- FeatureEffect$new(predictor, feature = "sex", method = "pdp")
 effect_plot_sex <- effect_sex$results %>% 
   filter(.class == "Loan approved") %>% 
-  ggplot(aes(x = applicant_sex, y = .value)) +
+  ggplot(aes(x = sex, y = .value)) +
   geom_col(fill = "steelblue") +
   facet_wrap(~"Loan approved")
 effect_plot_sex
@@ -215,27 +222,27 @@ effect_plot_co <- effect_co$results %>%
   facet_wrap(~"Loan approved")
 effect_plot_co
 
-effect_income <- FeatureEffect$new(predictor, feature = "income_log", method = "pdp")
+effect_income <- FeatureEffect$new(predictor, feature = "income", method = "pdp")
 effect_plot_income <- effect_income$results %>% 
   filter(.class == "Loan approved") %>% 
-  ggplot(aes(x = income_log, y = .value)) +
+  ggplot(aes(x = income, y = .value)) +
   geom_line() +
   facet_wrap(~"Loan approved")
 effect_plot_income
 
-effect_amount <- FeatureEffect$new(predictor, feature = "loan_amount_log", method = "pdp")
+effect_amount <- FeatureEffect$new(predictor, feature = "loan_amount", method = "pdp")
 effect_plot_amount <- effect_amount$results %>% 
   filter(.class == "Loan approved") %>% 
-  ggplot(aes(x = loan_amount_log, y = .value)) +
+  ggplot(aes(x = loan_amount, y = .value)) +
   geom_line() +
   scale_x_continuous(labels = label_comma()) +
   facet_wrap(~"Loan approved")
 effect_plot_amount
 
-effect_property <- FeatureEffect$new(predictor, feature = "property_value_log", method = "pdp")
+effect_property <- FeatureEffect$new(predictor, feature = "property_value", method = "pdp")
 effect_plot_property <- effect_property$results %>% 
   filter(.class == "Loan approved") %>% 
-  ggplot(aes(x = property_value_log, y = .value)) +
+  ggplot(aes(x = property_value, y = .value)) +
   geom_line() +
   scale_x_continuous(labels = label_comma()) +
   facet_wrap(~"Loan approved")
