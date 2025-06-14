@@ -271,7 +271,11 @@ effect_plot_amount <- effect_amount$results %>%
   ggplot(aes(x = loan_amount, y = .value)) +
   geom_line() +
   scale_x_continuous(labels = label_comma()) +
-  facet_wrap(~"Loan approved")
+  labs(
+    y = "Predicted probability",
+    x = element_blank()
+  ) +
+  ylim(0, 1)
 effect_plot_amount
 
 effect_property <- FeatureEffect$new(predictor, feature = "property_value", method = "pdp")
@@ -282,3 +286,7 @@ effect_plot_property <- effect_property$results %>%
   scale_x_continuous(labels = label_comma()) +
   facet_wrap(~"Loan approved")
 effect_plot_property
+
+# Save plots
+ggsave(file = "./plots/linear_svm/effect_debt.pdf", plot = effect_plot_debt)
+ggsave(file = "./plots/linear_svm/effect_purpose.pdf", plot = effect_plot_purpose)
