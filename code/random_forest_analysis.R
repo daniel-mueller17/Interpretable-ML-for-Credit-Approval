@@ -98,7 +98,7 @@ future::plan("sequential")
 
 # Save values
 write.csv(df_loco, file = "./data/feature_importance/rf_loco.csv")
-write.csv(data, file = "./data/feature_importance/rf_loci.csv")
+write.csv(df_loci, file = "./data/feature_importance/rf_loci.csv")
 
 # Plot results
 theme_set(theme_bw(base_size = 28))
@@ -131,6 +131,8 @@ ggsave(file = "./plots/rf/loci.pdf", plot = loci_plot)
 # Partial Dependence Plot
 
 # Train model for pdp
+set.seed(247)
+
 splits = partition(task, ratio = 0.75)
 learner_pdp <- lrn("classif.ranger", predict_type = "prob")
 learner_pdp$param_set$set_values(.values = best_par)

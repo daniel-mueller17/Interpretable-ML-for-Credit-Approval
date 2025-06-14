@@ -113,7 +113,7 @@ future::plan("sequential")
 
 # Save values
 write.csv(df_loco, file = "./data/feature_importance/linear_svm_loco.csv")
-write.csv(data, file = "./data/feature_importance/linear_svm_loci.csv")
+write.csv(df_loci, file = "./data/feature_importance/linear_svm_loci.csv")
 
 # Plot results
 theme_set(theme_bw(base_size = 28))
@@ -146,6 +146,8 @@ ggsave(file = "./plots/linear_svm/loci.pdf", plot = loci_plot)
 # Partial Dependence Plot
 
 # Train model for pdp
+set.seed(247)
+
 splits = partition(task, ratio = 0.75)
 learner_pdp<- as_learner(factor_pipeline %>>% learner)
 learner_pdp$param_set$set_values(classif.svm.cost = best_par$cost)
