@@ -214,13 +214,19 @@ ggsave(file = "./plots/linear_model/effect_race.pdf", plot = effect_plot_race)
 ggsave(file = "./plots/linear_model/effect_preapproval.pdf", plot = effect_plot_pre)
 
 # Save effect data for comparison
-write.csv(effect_debt$results, "./data/feature_effects/linear_model/debt.csv")
-write.csv(effect_purpose$results, "./data/feature_effects/linear_model/purpose.csv")
-write.csv(effect_pre$results, "./data/feature_effects/linear_model/pre.csv")
-write.csv(effect_amount$results, "./data/feature_effects/linear_model/amount.csv")
-write.csv(effect_lien$results, "./data/feature_effects/linear_model/lien.csv")
-write.csv(effect_co$results, "./data/feature_effects/linear_model/co.csv")
-write.csv(effect_income$results, "./data/feature_effects/linear_model/income.csv")
-write.csv(effect_race$results, "./data/feature_effects/linear_model/race.csv")
-write.csv(effect_eth$results, "./data/feature_effects/linear_model/eth.csv")
-write.csv(effect_sex$results, "./data/feature_effects/linear_model/sex.csv")
+
+list_effects_old <- list(effect_debt$results, effect_purpose$results, effect_pre$results, effect_amount$results, effect_lien$results,
+                       effect_co$results, effect_income$results, effect_race$results, effect_eth$results, effect_sex$results)
+
+list_effects <- lapply(list_effects_old, function(x) cbind(x, Model = "Logistic Regression"))
+
+write.csv(list_effects[[1]], "./data/feature_effects/linear_model/debt.csv")
+write.csv(list_effects[[2]], "./data/feature_effects/linear_model/purpose.csv")
+write.csv(list_effects[[3]], "./data/feature_effects/linear_model/pre.csv")
+write.csv(list_effects[[4]], "./data/feature_effects/linear_model/amount.csv")
+write.csv(list_effects[[5]], "./data/feature_effects/linear_model/lien.csv")
+write.csv(list_effects[[6]], "./data/feature_effects/linear_model/co.csv")
+write.csv(list_effects[[7]], "./data/feature_effects/linear_model/income.csv")
+write.csv(list_effects[[8]], "./data/feature_effects/linear_model/race.csv")
+write.csv(list_effects[[9]], "./data/feature_effects/linear_model/eth.csv")
+write.csv(list_effects[[10]], "./data/feature_effects/linear_model/sex.csv")
