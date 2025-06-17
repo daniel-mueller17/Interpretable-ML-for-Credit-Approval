@@ -199,10 +199,28 @@ effect_plot_co <- effect_co$results %>%
   facet_wrap(~"Loan approved")
 effect_plot_co
 
+effect_eth <- FeatureEffect$new(predictor, feature = "ethnicity", method = "pdp")
+effect_plot_eth <- effect_eth$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = ethnicity, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_eth
+
 # Save plots
 ggsave(file = "./plots/linear_model/effect_debt.pdf", plot = effect_plot_debt)
 ggsave(file = "./plots/linear_model/effect_purpose.pdf", plot = effect_plot_purpose)
 ggsave(file = "./plots/linear_model/effect_race.pdf", plot = effect_plot_race)
 ggsave(file = "./plots/linear_model/effect_preapproval.pdf", plot = effect_plot_pre)
 
-
+# Save effect data for comparison
+write.csv(effect_debt$results, "./data/feature_effects/linear_model/debt.csv")
+write.csv(effect_purpose$results, "./data/feature_effects/linear_model/purpose.csv")
+write.csv(effect_pre$results, "./data/feature_effects/linear_model/pre.csv")
+write.csv(effect_amount$results, "./data/feature_effects/linear_model/amount.csv")
+write.csv(effect_lien$results, "./data/feature_effects/linear_model/lien.csv")
+write.csv(effect_co$results, "./data/feature_effects/linear_model/co.csv")
+write.csv(effect_income$results, "./data/feature_effects/linear_model/income.csv")
+write.csv(effect_race$results, "./data/feature_effects/linear_model/race.csv")
+write.csv(effect_eth$results, "./data/feature_effects/linear_model/eth.csv")
+write.csv(effect_sex$results, "./data/feature_effects/linear_model/sex.csv")
