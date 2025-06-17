@@ -257,9 +257,37 @@ effect_plot_occ <- effect_occ$results %>%
   facet_wrap(~"Loan approved")
 effect_plot_occ
 
+effect_pre <- FeatureEffect$new(predictor, feature = "preapproval", method = "pdp")
+effect_plot_pre <- effect_pre$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = preapproval, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_pre
+
+effect_lien <- FeatureEffect$new(predictor, feature = "lien_status", method = "pdp")
+effect_plot_lien <- effect_lien$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = lien_status, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_lien
+
 # Save plots
 ggsave(file = "./plots/tree/effect_debt.pdf", plot = effect_plot_debt)
 ggsave(file = "./plots/tree/effect_purpose.pdf", plot = effect_plot_purpose)
 ggsave(file = "./plots/tree/effect_amount.pdf", plot = effect_plot_amount)
 ggsave(file = "./plots/tree/effect_property.pdf", plot = effect_plot_property)
 ggsave(file = "./plots/tree/effect_income.pdf", plot = effect_plot_income)
+
+# Save effect data for comparison
+write.csv(effect_debt$results, "./data/feature_effects/tree/debt.csv")
+write.csv(effect_purpose$results, "./data/feature_effects/tree/purpose.csv")
+write.csv(effect_pre$results, "./data/feature_effects/tree/pre.csv")
+write.csv(effect_amount$results, "./data/feature_effects/tree/amount.csv")
+write.csv(effect_lien$results, "./data/feature_effects/tree/lien.csv")
+write.csv(effect_co$results, "./data/feature_effects/tree/co.csv")
+write.csv(effect_income$results, "./data/feature_effects/tree/income.csv")
+write.csv(effect_race$results, "./data/feature_effects/tree/race.csv")
+write.csv(effect_eth$results, "./data/feature_effects/tree/eth.csv")
+write.csv(effect_sex$results, "./data/feature_effects/tree/sex.csv")
