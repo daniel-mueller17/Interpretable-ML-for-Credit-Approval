@@ -281,7 +281,6 @@ ggsave(file = "./plots/tree/effect_property.pdf", plot = effect_plot_property)
 ggsave(file = "./plots/tree/effect_income.pdf", plot = effect_plot_income)
 
 # Save effect data for comparison
-
 list_effects_old <- list(effect_debt$results, effect_purpose$results, effect_pre$results, effect_amount$results, effect_lien$results,
                          effect_co$results, effect_income$results, effect_race$results, effect_eth$results, effect_sex$results)
 
