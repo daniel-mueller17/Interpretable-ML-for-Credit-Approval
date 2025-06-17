@@ -1,0 +1,7 @@
+"","ethnicity",".class",".value",".type"
+"1","Not Hispanic or Latino","Loan approved",0.735879230721316,"pdp"
+"2","Not Hispanic or Latino","Loan denied",0.264120769278685,"pdp"
+"3","Unknwon","Loan approved",0.711986985856089,"pdp"
+"4","Unknwon","Loan denied",0.28801301414391,"pdp"
+"5","Hispanic or Latino","Loan approved",0.696401733078887,"pdp"
+"6","Hispanic or Latino","Loan denied",0.303598266921113,"pdp"

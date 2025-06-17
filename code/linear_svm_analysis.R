@@ -292,3 +292,15 @@ effect_plot_property
 # Save plots
 ggsave(file = "./plots/linear_svm/effect_debt.pdf", plot = effect_plot_debt)
 ggsave(file = "./plots/linear_svm/effect_purpose.pdf", plot = effect_plot_purpose)
+
+# Save effect data for comparison
+write.csv(effect_debt$results, "./data/feature_effects/linear_svm/debt.csv")
+write.csv(effect_purpose$results, "./data/feature_effects/linear_svm/purpose.csv")
+write.csv(effect_pre$results, "./data/feature_effects/linear_svm/pre.csv")
+write.csv(effect_amount$results, "./data/feature_effects/linear_svm/amount.csv")
+write.csv(effect_lien$results, "./data/feature_effects/linear_svm/lien.csv")
+write.csv(effect_co$results, "./data/feature_effects/linear_svm/co.csv")
+write.csv(effect_income$results, "./data/feature_effects/linear_svm/income.csv")
+write.csv(effect_race$results, "./data/feature_effects/linear_svm/race.csv")
+write.csv(effect_eth$results, "./data/feature_effects/linear_svm/eth.csv")
+write.csv(effect_sex$results, "./data/feature_effects/linear_svm/sex.csv")
