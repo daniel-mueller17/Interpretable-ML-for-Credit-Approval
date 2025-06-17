@@ -1,0 +1,5 @@
+"","lien_status",".class",".value",".type"
+"1","Secured by a first lien","Loan approved",0.738199854247783,"pdp"
+"2","Secured by a first lien","Loan denied",0.261800145752217,"pdp"
+"3","Secured by a subordinate lien","Loan approved",0.698762622197764,"pdp"
+"4","Secured by a subordinate lien","Loan denied",0.301237377802236,"pdp"

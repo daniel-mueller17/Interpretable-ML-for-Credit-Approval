@@ -1,0 +1,5 @@
+"","preapproval",".class",".value",".type"
+"1","Preapproval not requested","Loan approved",0.728745318610253,"pdp"
+"2","Preapproval not requested","Loan denied",0.271254681389747,"pdp"
+"3","Preapproval requested","Loan approved",0.741556658961531,"pdp"
+"4","Preapproval requested","Loan denied",0.258443341038468,"pdp"
