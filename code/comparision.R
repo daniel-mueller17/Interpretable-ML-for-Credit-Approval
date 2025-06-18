@@ -44,7 +44,7 @@ performance_all <- rbind(performance_linear, performance_tree, performance_rf,
                          performance_linear_svm, performance_non_linear_svm)
 
 # Save data
-write.csv(performance_all, file = "./data/performance_models/all_models.csv")
+write.csv(performance_all, file = "./data/performance_models/all_models.csv", row.names = FALSE, quote = FALSE)
 
 
 # Feature importnace
