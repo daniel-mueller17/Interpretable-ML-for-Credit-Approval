@@ -1,0 +1,7 @@
+"","loan_type",".class",".value",".type","Model"
+"1","Conventional","Loan approved",0.725708637354498,"pdp","Linear SVM"
+"2","Conventional","Loan denied",0.2742913626455,"pdp","Linear SVM"
+"3","FHA","Loan approved",0.731586862239973,"pdp","Linear SVM"
+"4","FHA","Loan denied",0.268413137760028,"pdp","Linear SVM"
+"5","VA","Loan approved",0.780322684338479,"pdp","Linear SVM"
+"6","VA","Loan denied",0.21967731566152,"pdp","Linear SVM"
