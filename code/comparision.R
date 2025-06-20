@@ -118,7 +118,8 @@ loco_plot_tree = fi_tree_loco %>%
   ggplot(aes(x = importance/max(importance), y = fct_reorder(feature, importance))) +
   geom_col(position = "identity", fill = "steelblue") +
   labs(
-    x = "Importance"
+    x = "Importance",
+    y = element_blank()
   )
 loco_plot_tree
 
@@ -126,7 +127,8 @@ loci_plot_tree = fi_tree_loci %>%
   ggplot(aes(x = importance/max(importance), y = fct_reorder(feature, importance))) +
   geom_col(position = "identity", fill = "#ff7f0e") +
   labs(
-    x = "Importance"
+    x = "Importance",
+    y = element_blank()
   )
 loci_plot_tree
 
@@ -154,7 +156,8 @@ loco_plot_linear_svm = fi_linear_svm_loco %>%
   ggplot(aes(x = importance/max(importance), y = fct_reorder(feature, importance))) +
   geom_col(position = "identity", fill = "steelblue") +
   labs(
-    x = "Importance"
+    x = "Importance",
+    y = element_blank()
   )
 loco_plot_linear_svm
 
@@ -162,7 +165,8 @@ loci_plot_linear_svm = fi_linear_svm_loci %>%
   ggplot(aes(x = importance/max(importance), y = fct_reorder(feature, importance))) +
   geom_col(position = "identity", fill = "#ff7f0e") +
   labs(
-    x = "Importance"
+    x = "Importance",
+    y = element_blank()
   )
 loci_plot_linear_svm
 
@@ -206,6 +210,7 @@ effect_linear_income <- read.csv("./data/feature_effects/linear_model/income.csv
 effect_linear_race <- read.csv("./data/feature_effects/linear_model/race.csv")
 effect_linear_eth <- read.csv("./data/feature_effects/linear_model/eth.csv")
 effect_linear_sex <- read.csv("./data/feature_effects/linear_model/sex.csv")
+effect_linear_type <- read.csv("./data/feature_effects/linear_model/type.csv")
 
 effect_tree_debt <- read.csv("./data/feature_effects/tree/debt.csv")
 effect_tree_purpose <- read.csv("./data/feature_effects/tree/purpose.csv")
@@ -217,6 +222,7 @@ effect_tree_income <- read.csv("./data/feature_effects/tree/income.csv")
 effect_tree_race <- read.csv("./data/feature_effects/tree/race.csv")
 effect_tree_eth <- read.csv("./data/feature_effects/tree/eth.csv")
 effect_tree_sex <- read.csv("./data/feature_effects/tree/sex.csv")
+effect_tree_type <- read.csv("./data/feature_effects/tree/type.csv")
 
 effect_rf_debt <- read.csv("./data/feature_effects/rf/debt.csv")
 effect_rf_purpose <- read.csv("./data/feature_effects/rf/purpose.csv")
@@ -228,6 +234,7 @@ effect_rf_income <- read.csv("./data/feature_effects/rf/income.csv")
 effect_rf_race <- read.csv("./data/feature_effects/rf/race.csv")
 effect_rf_eth <- read.csv("./data/feature_effects/rf/eth.csv")
 effect_rf_sex <- read.csv("./data/feature_effects/rf/sex.csv")
+effect_rf_type <- read.csv("./data/feature_effects/rf/type.csv")
 
 effect_linear_svm_debt <- read.csv("./data/feature_effects/linear_svm/debt.csv")
 effect_linear_svm_purpose <- read.csv("./data/feature_effects/linear_svm/purpose.csv")
@@ -239,6 +246,7 @@ effect_linear_svm_income <- read.csv("./data/feature_effects/linear_svm/income.c
 effect_linear_svm_race <- read.csv("./data/feature_effects/linear_svm/race.csv")
 effect_linear_svm_eth <- read.csv("./data/feature_effects/linear_svm/eth.csv")
 effect_linear_svm_sex <- read.csv("./data/feature_effects/linear_svm/sex.csv")
+effect_linear_svm_type <- read.csv("./data/feature_effects/linear_svm/type.csv")
 
 effect_non_linear_svm_debt <- read.csv("./data/feature_effects/non_linear_svm/debt.csv")
 effect_non_linear_svm_purpose <- read.csv("./data/feature_effects/non_linear_svm/purpose.csv")
@@ -250,6 +258,7 @@ effect_non_linear_svm_income <- read.csv("./data/feature_effects/non_linear_svm/
 effect_non_linear_svm_race <- read.csv("./data/feature_effects/non_linear_svm/race.csv")
 effect_non_linear_svm_eth <- read.csv("./data/feature_effects/non_linear_svm/eth.csv")
 effect_non_linear_svm_sex <- read.csv("./data/feature_effects/non_linear_svm/sex.csv")
+effect_non_linear_svm_type <- read.csv("./data/feature_effects/non_linear_svm/type.csv")
 
 # Combine datasets
 effect_debt <- rbind(effect_linear_debt, effect_tree_debt, effect_rf_debt, effect_linear_svm_debt, effect_non_linear_svm_debt)
@@ -262,6 +271,7 @@ effect_income <- rbind(effect_linear_income, effect_tree_income, effect_rf_incom
 effect_race <- rbind(effect_linear_race, effect_tree_race, effect_rf_race, effect_linear_svm_race, effect_non_linear_svm_race)
 effect_eth <- rbind(effect_linear_eth, effect_tree_eth, effect_rf_eth, effect_linear_svm_eth, effect_non_linear_svm_eth)
 effect_sex <- rbind(effect_linear_sex, effect_tree_sex, effect_rf_sex, effect_linear_svm_sex, effect_non_linear_svm_sex)
+effect_type <- rbind(effect_linear_type, effect_tree_type, effect_rf_type, effect_linear_svm_type, effect_non_linear_svm_type)
 
 # Plot results
 theme_set(theme_bw(base_size = 19))
@@ -273,7 +283,7 @@ effect_plot_debt <- effect_debt %>%
   mutate(
     debt_income_ratio = factor(debt_income_ratio,
                                levels = c("<20%", "20%-29%", "30%-35%", "36%-42%", "43%-49%", "50%-60%", ">60%", "Unknown")),
-    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = debt_income_ratio, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -293,7 +303,7 @@ effect_plot_debt
 effect_plot_purpose <- effect_purpose %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = loan_purpose, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -313,7 +323,7 @@ effect_plot_purpose
 effect_plot_pre <- effect_pre %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = preapproval, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -333,7 +343,7 @@ effect_plot_pre
 effect_plot_amount <- effect_amount %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = loan_amount, y = .value, color = Model)) +
   geom_line(linewidth = 1) +
@@ -353,7 +363,7 @@ effect_plot_amount
 effect_plot_lien <- effect_lien %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = lien_status, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -373,7 +383,7 @@ effect_plot_lien
 effect_plot_co <- effect_co %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = has_co.applicant, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -393,7 +403,7 @@ effect_plot_co
 effect_plot_income <- effect_income %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = income, y = .value, color = Model)) +
   geom_line(linewidth = 1) +
@@ -413,7 +423,7 @@ effect_plot_income
 effect_plot_race <- effect_race %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = race, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -433,7 +443,7 @@ effect_plot_race
 effect_plot_eth <- effect_eth %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = ethnicity, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -453,7 +463,7 @@ effect_plot_eth
 effect_plot_sex <- effect_sex %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = sex, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -468,3 +478,31 @@ effect_plot_sex <- effect_sex %>%
   scale_fill_manual(values = color_vector) +
   ylim(0, 1)
 effect_plot_sex
+
+# Sex
+effect_plot_type <- effect_type %>% 
+  filter(.class == "Loan approved") %>% 
+  mutate(
+    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+  ) %>% 
+  ggplot(aes(x = loan_type, y = .value, fill = Model)) +
+  geom_col(position = "dodge") +
+  labs(
+    y = "Predicted probability",
+    x = element_blank()
+  ) +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank()
+  ) +
+  scale_fill_manual(values = color_vector) +
+  ylim(0, 1)
+effect_plot_type
+
+# Save plots
+ggsave(file = "./plots/comparison/debt_pdp.pdf", plot = effect_plot_debt)
+ggsave(file = "./plots/comparison/purpose_pdp.pdf", plot = effect_plot_purpose)
+ggsave(file = "./plots/comparison/lien_pdp.pdf", plot = effect_plot_lien)
+ggsave(file = "./plots/comparison/type_pdp.pdf", plot = effect_plot_type)
+ggsave(file = "./plots/comparison/race_pdp.pdf", plot = effect_plot_race)
+ggsave(file = "./plots/comparison/eth_pdp.pdf", plot = effect_plot_eth)
