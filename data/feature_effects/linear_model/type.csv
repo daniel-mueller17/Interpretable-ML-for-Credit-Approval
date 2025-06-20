@@ -1,0 +1,7 @@
+"","loan_type",".class",".value",".type","Model"
+"1","Conventional","Loan approved",0.743648825955614,"pdp","Logistic Regression"
+"2","Conventional","Loan denied",0.256351174044386,"pdp","Logistic Regression"
+"3","FHA","Loan approved",0.71849040920348,"pdp","Logistic Regression"
+"4","FHA","Loan denied",0.28150959079652,"pdp","Logistic Regression"
+"5","VA","Loan approved",0.821913019478699,"pdp","Logistic Regression"
+"6","VA","Loan denied",0.1780869805213,"pdp","Logistic Regression"
