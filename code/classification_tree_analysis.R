@@ -273,6 +273,14 @@ effect_plot_lien <- effect_lien$results %>%
   facet_wrap(~"Loan approved")
 effect_plot_lien
 
+effect_type <- FeatureEffect$new(predictor, feature = "loan_type", method = "pdp")
+effect_plot_type <- effect_type$results %>% 
+  filter(.class == "Loan approved") %>% 
+  ggplot(aes(x = loan_type, y = .value)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~"Loan approved")
+effect_plot_type
+
 # Save plots
 ggsave(file = "./plots/tree/effect_debt.pdf", plot = effect_plot_debt)
 ggsave(file = "./plots/tree/effect_purpose.pdf", plot = effect_plot_purpose)
@@ -282,9 +290,9 @@ ggsave(file = "./plots/tree/effect_income.pdf", plot = effect_plot_income)
 
 # Save effect data for comparison
 list_effects_old <- list(effect_debt$results, effect_purpose$results, effect_pre$results, effect_amount$results, effect_lien$results,
-                         effect_co$results, effect_income$results, effect_race$results, effect_eth$results, effect_sex$results)
+                         effect_co$results, effect_income$results, effect_race$results, effect_eth$results, effect_sex$results, effect_type$results)
 
-list_effects <- lapply(list_effects_old, function(x) cbind(x, Model = "Tree"))
+list_effects <- lapply(list_effects_old, function(x) cbind(x, Model = "Classification Tree"))
 
 write.csv(list_effects[[1]], "./data/feature_effects/tree/debt.csv")
 write.csv(list_effects[[2]], "./data/feature_effects/tree/purpose.csv")
@@ -296,3 +304,4 @@ write.csv(list_effects[[7]], "./data/feature_effects/tree/income.csv")
 write.csv(list_effects[[8]], "./data/feature_effects/tree/race.csv")
 write.csv(list_effects[[9]], "./data/feature_effects/tree/eth.csv")
 write.csv(list_effects[[10]], "./data/feature_effects/tree/sex.csv")
+write.csv(list_effects[[11]], "./data/feature_effects/tree/type.csv")
