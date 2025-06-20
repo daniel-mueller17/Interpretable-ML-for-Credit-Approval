@@ -283,7 +283,7 @@ effect_plot_debt <- effect_debt %>%
   mutate(
     debt_income_ratio = factor(debt_income_ratio,
                                levels = c("<20%", "20%-29%", "30%-35%", "36%-42%", "43%-49%", "50%-60%", ">60%", "Unknown")),
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = debt_income_ratio, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -303,12 +303,12 @@ effect_plot_debt
 effect_plot_purpose <- effect_purpose %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = loan_purpose, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
   labs(
-    y = "Predicted probability",
+    y = element_blank(),
     x = element_blank()
   ) +
   theme(
@@ -323,7 +323,7 @@ effect_plot_purpose
 effect_plot_pre <- effect_pre %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = preapproval, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -343,7 +343,7 @@ effect_plot_pre
 effect_plot_amount <- effect_amount %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = loan_amount, y = .value, color = Model)) +
   geom_line(linewidth = 1) +
@@ -363,7 +363,7 @@ effect_plot_amount
 effect_plot_lien <- effect_lien %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = lien_status, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -383,7 +383,7 @@ effect_plot_lien
 effect_plot_co <- effect_co %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = has_co.applicant, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -403,7 +403,7 @@ effect_plot_co
 effect_plot_income <- effect_income %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = income, y = .value, color = Model)) +
   geom_line(linewidth = 1) +
@@ -423,7 +423,7 @@ effect_plot_income
 effect_plot_race <- effect_race %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = race, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -443,12 +443,12 @@ effect_plot_race
 effect_plot_eth <- effect_eth %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = ethnicity, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
   labs(
-    y = "Predicted probability",
+    y = element_blank(),
     x = element_blank()
   ) +
   theme(
@@ -463,7 +463,7 @@ effect_plot_eth
 effect_plot_sex <- effect_sex %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = sex, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
@@ -479,16 +479,16 @@ effect_plot_sex <- effect_sex %>%
   ylim(0, 1)
 effect_plot_sex
 
-# Sex
+# Type
 effect_plot_type <- effect_type %>% 
   filter(.class == "Loan approved") %>% 
   mutate(
-    Model = factor(Model, levels = c("Logistic Regression", "Classification Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
+    Model = factor(Model, levels = c("Logistic Regression", "Tree", "Random Forest", "Linear SVM", "Non-Linear SVM"))
   ) %>% 
   ggplot(aes(x = loan_type, y = .value, fill = Model)) +
   geom_col(position = "dodge") +
   labs(
-    y = "Predicted probability",
+    y = element_blank(),
     x = element_blank()
   ) +
   theme(

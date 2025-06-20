@@ -284,7 +284,7 @@ ggsave(file = "./plots/tree/effect_income.pdf", plot = effect_plot_income)
 list_effects_old <- list(effect_debt$results, effect_purpose$results, effect_pre$results, effect_amount$results, effect_lien$results,
                          effect_co$results, effect_income$results, effect_race$results, effect_eth$results, effect_sex$results, effect_type$results)
 
-list_effects <- lapply(list_effects_old, function(x) cbind(x, Model = "Classification Tree"))
+list_effects <- lapply(list_effects_old, function(x) cbind(x, Model = "Tree"))
 
 write.csv(list_effects[[1]], "./data/feature_effects/tree/debt.csv")
 write.csv(list_effects[[2]], "./data/feature_effects/tree/purpose.csv")
