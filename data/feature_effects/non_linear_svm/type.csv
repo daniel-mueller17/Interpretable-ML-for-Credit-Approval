@@ -1,0 +1,7 @@
+"","loan_type",".class",".value",".type","Model"
+"1","Conventional","Loan approved",0.721603273316709,"pdp","Non-Linear SVM"
+"2","Conventional","Loan denied",0.27839672668329,"pdp","Non-Linear SVM"
+"3","FHA","Loan approved",0.713917160097363,"pdp","Non-Linear SVM"
+"4","FHA","Loan denied",0.286082839902638,"pdp","Non-Linear SVM"
+"5","VA","Loan approved",0.740345200917121,"pdp","Non-Linear SVM"
+"6","VA","Loan denied",0.259654799082878,"pdp","Non-Linear SVM"
