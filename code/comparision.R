@@ -46,7 +46,7 @@ performance_all <- rbind(performance_linear, performance_tree, performance_rf,
 names(performance_all) <- c("Model", "Accuracy", "Precision", "Recall", "Specificity", "F1-score", "log loss")
 
 # Save data
-write.csv(performance_all[1:6], file = "./data/performance_models/all_models.csv", row.names = FALSE, quote = FALSE)
+write.csv(performance_all, file = "./data/performance_models/all_models.csv", row.names = FALSE, quote = FALSE)
 
 
 # Feature importnace

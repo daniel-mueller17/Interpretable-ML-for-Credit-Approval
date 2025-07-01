@@ -1,6 +1,6 @@
-Model,Accuracy,Precision,Recall,Specificity,F1-score
-Logistic Rgegression,0.838,0.854,0.944,0.532,0.897
-Classifiaction Tree,0.842,0.858,0.944,0.545,0.899
-Random Forest,0.848,0.862,0.948,0.559,0.903
-Linear SVM,0.833,0.848,0.945,0.507,0.894
-Non-Linear SVM,0.833,0.849,0.944,0.51,0.894
+Model,Accuracy,Precision,Recall,Specificity,F1-score,log loss
+Logistic Rgegression,0.838,0.854,0.944,0.532,0.897,0.37
+Classifiaction Tree,0.842,0.858,0.944,0.545,0.899,0.384
+Random Forest,0.848,0.862,0.948,0.559,0.903,0.359
+Linear SVM,0.833,0.848,0.945,0.507,0.894,0.396
+Non-Linear SVM,0.833,0.849,0.944,0.51,0.894,0.395
