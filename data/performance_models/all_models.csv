@@ -1,4 +1,4 @@
-Accuracy,Precision,Recall,Specificity,F1-score,log loss
+Model,Accuracy,Precision,Recall,Specificity,F1-score
 Logistic Rgegression,0.838,0.854,0.944,0.532,0.897
 Classifiaction Tree,0.842,0.858,0.944,0.545,0.899
 Random Forest,0.848,0.862,0.948,0.559,0.903
